@@ -173,7 +173,7 @@
       <div class="backup-bar">
         <button class="btn secondary" id="exportBtn" title="تنزيل نسخة احتياطية من كل السجلات">⬇️ نسخة احتياطية</button>
         <button class="btn primary" id="excelBtn" title="تصدير كل الجداول إلى Excel — كل سجل في ورقة">📊 تصدير Excel</button>
-        <label class="btn secondary" style="text-align:center">⬆️ استيراد<input id="importInput" type="file" accept=".json,application/json" hidden></label>
+        <button class="btn secondary" id="importBtn" type="button">⬆️ استيراد</button><input id="importInput" type="file" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;left:-9999px">
       </div>
       <div class="date-filter"><span>📅 تاريخ السجل</span><label>من <input type="date" id="dateFrom"></label><label>إلى <input type="date" id="dateTo"></label><button class="btn secondary" id="dateClear" title="إلغاء فلتر التاريخ">✕</button></div>
       <div class="search-bar" id="searchBar" hidden><span class="sum" id="searchSum"></span><div class="opts"><label><input type="checkbox" id="scatterChk"> الأرقام متفرقة (أي موقع وأي ترتيب)</label><label><input type="checkbox" id="cropChk" checked> مع صورة السطر</label><label><input type="checkbox" id="approxChk" checked> طباعة القريبة ≈</label></div><button class="btn primary" id="printResultsBtn">🖨️ طباعة النتائج PDF</button></div>
@@ -933,10 +933,11 @@ $('#exportBtn').onclick=async()=>{
   setTimeout(()=>URL.revokeObjectURL(a.href),5000);
   toast(`تم تنزيل ${data.length} سجلًا`);
 };
+$('#importBtn').onclick=()=>{$('#importInput').value='';$('#importInput').click()};
 $('#importInput').onchange=async e=>{
   const f=e.target.files[0];if(!f)return;
   try{
-    const data=JSON.parse(await f.text());
+    let data;try{data=JSON.parse(await f.text())}catch(_){throw new Error('هذا ليس ملف نسخة احتياطية — اختر الملف الذي نزل من زر «نسخة احتياطية» (.json)')}
     const arr=Array.isArray(data)?data:data.records;
     if(!Array.isArray(arr))throw new Error('ملف غير صالح');
     let n=0;
@@ -1244,5 +1245,4 @@ async function save(startNew=false){
   if(startNew)newRecord();else{$('#deleteBtn').hidden=false;setAutoState('saved')}
 }
 $('#imageInput').onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{recCalib=null;showImage(rd.result);markDirty();setTimeout(()=>autoCalibrate(),50)};rd.readAsDataURL(f)};
-$('#convertBtn').onclick=convertText;$('#compareBtn').onclick=compareWithAI;$('#zoomIn').onclick=()=>{zoom=Math.min(3,zoom+.2);applyZoom()};$('#zoomOut').onclick=()=>{zoom=Math.max(.4,zoom-.2);applyZoom()};
-$('#addRow').onclick=()=>{addRow(currentHeaders.map((_,i)=>i===0?String($('#tbody').rows.length+1):
+$('#convertBtn').onclick=convertText;$('#compareBtn')
