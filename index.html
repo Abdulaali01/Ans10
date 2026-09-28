@@ -1,0 +1,1248 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#173f5f">
+  <title>محرر الجداول مع الصور</title>
+  <style>
+    :root{--navy:#173f5f;--blue:#246b94;--sky:#eaf5fb;--line:#cbdde8;--ink:#17212b;--muted:#647483;--danger:#b42318;--ok:#157347;--radius:14px}
+    *{box-sizing:border-box} body{margin:0;background:#f3f7fa;color:var(--ink);font-family:Tahoma,Arial,sans-serif;font-size:16px}
+    button,input,textarea{font:inherit} button{cursor:pointer}.app{min-height:100vh;display:grid;grid-template-rows:auto 1fr}
+    header{background:var(--navy);color:#fff;padding:12px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;box-shadow:0 2px 12px #173f5f33}
+    header h1{font-size:1.15rem;margin:0 0 0 auto}.search{position:relative;flex:1;max-width:520px;min-width:220px}.search input{width:100%;border:0;border-radius:10px;padding:10px 14px;background:#fff;color:#111}
+    .shell{padding:14px;display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:14px;min-height:0}
+    .card{background:#fff;border:1px solid #dce7ed;border-radius:var(--radius);box-shadow:0 5px 20px #173f5f10}
+    .workspace{padding:14px;min-width:0}.top-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+    label{display:block;font-weight:700;font-size:.9rem;margin-bottom:6px}.field,input[type=text],textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;background:#fff;color:var(--ink)}
+    textarea{min-height:92px;resize:vertical;line-height:1.7}.split{display:grid;grid-template-columns:minmax(0,42%) minmax(0,58%);gap:10px;align-items:start}
+    .image-panel,.table-panel{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}.panel-head{padding:10px 12px;background:var(--sky);display:flex;align-items:center;gap:8px;flex-wrap:wrap}.panel-head strong{margin-left:auto}
+    .upload-btn,.btn{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:9px;padding:9px 13px;font-weight:700}.upload-btn{background:var(--blue);color:#fff}.upload-btn input{display:none}
+    .image-wrap{position:relative;min-height:460px;max-height:70vh;overflow:auto;background:#20262b;display:grid;place-items:center}.image-wrap img{max-width:100%;height:auto;display:block}.empty{color:#dce7ed;text-align:center;padding:28px}.empty b{display:block;font-size:2rem;margin-bottom:8px}
+    .table-wrap{overflow:auto;max-height:70vh}table{width:100%;border-collapse:separate;border-spacing:0;min-width:0;table-layout:fixed;direction:rtl}th{position:sticky;top:0;z-index:1;background:var(--navy);color:#fff;padding:8px 4px;border-left:1px solid #ffffff44;overflow-wrap:anywhere}td{border-bottom:1px solid var(--line);border-left:1px solid var(--line);padding:0;background:#fff;transition:background .15s,box-shadow .15s}tbody tr:nth-child(even) td{background:#f4fafd}tbody tr.editing td{background:#dff1fb}
+    /* تعديل محفوظ = رمادي معتم ، تعديل غير محفوظ = أصفر */
+    tbody td.saved-edit{background:#dfe4e8!important;box-shadow:inset 0 0 0 2px #8a9aa6}tbody td.saved-edit input{color:#34414c}
+    tbody td.changed{background:#fff0a8!important;box-shadow:inset 0 0 0 2px #e6a700}
+    td input{width:100%;border:0;background:transparent;padding:8px 3px;text-align:center;min-width:0}td input:focus{outline:3px solid #1685c555;position:relative;background:#fff}.num{width:42px;text-align:center}td.num{cursor:pointer;background:#eaf5fb!important}td.num input{cursor:pointer;font-weight:700}.row-actions{width:38px;text-align:center}.remove{border:0;background:transparent;color:var(--danger);font-size:1.1rem;padding:6px}.edit-hint{font-size:.74rem;color:#49616f;background:#fff;border-radius:999px;padding:4px 8px}
+    .actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding-top:12px}.primary{background:var(--ok);color:#fff}.secondary{background:#e7f1f6;color:var(--navy)}.danger{background:#fff0ef;color:var(--danger)}
+    .auto-state{font-size:.8rem;color:var(--muted);margin-right:auto}.auto-state.ok{color:var(--ok)}.auto-state.err{color:var(--danger)}
+    .ai-tools{display:grid;grid-template-columns:minmax(180px,1fr) auto;gap:8px;align-items:end;margin:0 0 12px;padding:10px;border:1px solid #e6c865;background:#fff9db;border-radius:12px}.ai-tools label{margin:0}.ai-tools input{margin-top:5px;background:#fff}#apiKey{display:block;width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;font-weight:400}.key-remember input{width:auto;margin:0}.ai-note{grid-column:1/-1;color:#6f5b13;font-size:.78rem}.ai-results{display:none;grid-column:1/-1;background:#fff;border:1px solid #e6c865;border-radius:9px;padding:9px;line-height:1.7}.ai-results.show{display:block}.ai-results ul{margin:5px 0 0;padding-right:20px}.ai-checking{opacity:.65;pointer-events:none}tbody td.ai-diff{background:#ffe36e!important;box-shadow:inset 0 0 0 3px #d97706}tbody td.ai-low{background:#fff4bd!important;box-shadow:inset 0 0 0 2px #e9b949}
+    aside{padding:12px;display:flex;flex-direction:column;min-height:0}.aside-title{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:10px}.aside-title h2{font-size:1rem;margin:0}.count{background:var(--sky);color:var(--navy);border-radius:999px;padding:3px 9px;font-weight:700}
+    .backup-bar{display:flex;gap:6px;margin:8px 0 2px}.backup-bar .btn{flex:1;padding:7px 4px;font-size:.78rem}
+    .records{overflow:auto;margin-top:8px;display:grid;gap:8px}.record{border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px;text-align:right}.record:hover{border-color:var(--blue);background:#f6fbfe}.record.current{border-color:var(--ok);background:#effaf3}.record b{display:block}.record .hit{display:block;font-size:.78rem;color:#6b3f00;background:#fff1d6;border:1px solid #f3c77a;border-radius:7px;padding:4px 7px;margin-top:5px;line-height:1.5}.record .hit:hover{background:#ffe2a8}.record .hit.approx{background:#eef4ff;border-color:#9db8e8;color:#1d3b6e}.record .hit.approx em{background:#c9dbff}.record .hit mark{background:#ff9f1c;color:#fff;border-radius:3px;padding:0 1px}.date-filter{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0 0;padding:7px 8px;border:1px solid var(--line);border-radius:10px;background:#f6fbfe;font-size:.8rem;font-weight:700;color:var(--navy)}.date-filter label{display:flex;align-items:center;gap:4px;margin:0;font-size:.8rem}.date-filter input{border:1px solid var(--line);border-radius:7px;padding:5px;font-size:.8rem;max-width:140px}.date-filter .btn{padding:5px 10px}.date-filter.on{border-color:#157347;background:#effaf3}
+    .search-bar{display:grid;gap:6px;margin:8px 0 0;padding:8px;border:1px solid #f3c77a;background:#fff8ea;border-radius:10px}.search-bar[hidden]{display:none}.search-bar .sum{font-weight:700;color:#6b3f00;font-size:.85rem}.search-bar .opts{display:flex;gap:10px;flex-wrap:wrap;font-size:.8rem}.search-bar .opts label{display:flex;align-items:center;gap:4px;margin:0;font-weight:400}.search-bar .btn{width:100%}#printArea .rep{direction:rtl;text-align:right;font-family:Tahoma,Arial,sans-serif;color:#000}.rep h2{font-size:16pt;margin:0 0 4px}.rep .meta{font-size:10pt;color:#444;margin:0 0 10px}.rep table{width:100%;border-collapse:collapse;font-size:10pt}.rep th,.rep td{border:1px solid #666;padding:4px 5px;text-align:center;vertical-align:middle}.rep th{background:#e6edf2;color:#000;position:static}.rep thead{display:table-header-group}.rep tbody{break-inside:avoid;page-break-inside:avoid}.rep mark{background:#ffd54f;font-weight:700;padding:0 1px}.rep .crop td{padding:2px;background:#fafafa}.rep .crop img{width:100%;max-height:70px;object-fit:contain;display:block}.rep .ap{color:#1d3b6e;font-size:8pt}.rep .plate{font-weight:700;font-size:11pt}.record .hit.img{background:#eaf7ee;border-color:#8fcca3;color:#1f5130}.record .hit.img em{background:#c6ecd2}.idx-btn{width:100%;margin-top:6px;font-size:.8rem}.key-remember{display:flex;align-items:center;gap:4px;font-size:.75rem;font-weight:400;margin-top:4px}.approx-note{background:#eef4ff;border:1px solid #9db8e8;color:#1d3b6e;border-radius:9px;padding:8px 10px;font-size:.82rem;line-height:1.6}#imgBox{position:relative;width:100%;overflow:hidden;align-self:start}#imgBox img{width:100%;max-width:none!important;display:block}.img-band{position:absolute;left:0;right:0;transform-origin:50% 50%;pointer-events:none;border:3px solid #f08c00;background:rgba(255,170,0,.25);box-shadow:0 0 0 9999px rgba(0,0,0,.28);transition:top .25s,height .25s;z-index:2}.img-band span{position:absolute;right:4px;top:-3px;transform:translateY(-100%);background:#f08c00;color:#fff;font-size:.72rem;font-weight:700;padding:2px 7px;border-radius:5px 5px 0 0;white-space:nowrap}.img-band.focus{border-color:#1685c5;background:rgba(22,133,197,.16);box-shadow:0 0 0 9999px rgba(0,0,0,.18)}.img-band.focus span{background:#1685c5}.img-band.calib{border-color:#16a34a;background:rgba(22,163,74,.2)}.img-band.calib span{background:#16a34a}.image-wrap.calibrating #imgBox{cursor:crosshair;outline:4px dashed #ffd166;outline-offset:-4px}#calibBtn.need{background:#fff1d6;color:#8a5300}.record .hit em{font-style:normal;font-weight:700;background:#ffd166;border-radius:4px;padding:0 3px}tbody tr.search-hit td{background:#ffe3b5!important;box-shadow:inset 0 0 0 2px #f08c00}.record small{color:var(--muted)}
+    .status{position:fixed;left:16px;bottom:16px;background:#13242f;color:#fff;padding:11px 15px;border-radius:10px;box-shadow:0 5px 20px #0004;opacity:0;transform:translateY(10px);transition:.2s;pointer-events:none;z-index:400;max-width:92vw}.status.show{opacity:1;transform:none}
+
+    /* ===== وضع التركيز ===== */
+    #focusToggle{transition:.15s}
+    #focusToggle.off{opacity:.45;text-decoration:line-through}
+    tbody.focus-on tr:not(.active) td{background:#222a31!important;transition:background .2s}
+    tbody.focus-on tr:not(.active) td input{color:#7d8b96;caret-color:#fff}
+    tbody.focus-on tr:not(.active) td.changed{background:#5c4b0c!important}
+    tbody.focus-on tr:not(.active) td.saved-edit{background:#3a454e!important}
+    tbody.focus-on tr.active td{background:#dff1fb!important;box-shadow:inset 0 0 0 3px #1685c5}
+    tbody.focus-on tr.active td.changed{background:#fff0a8!important}
+    tbody.focus-on tr.active td.saved-edit{background:#dfe4e8!important}
+
+    /* ===== النافذة المنبثقة للصف (قابلة للسحب) ===== */
+    .modal-overlay{position:fixed;inset:0;background:rgba(15,25,35,.55);z-index:100;display:none}
+    .modal-overlay.show{display:block}
+    .modal-box{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:#fff;border-radius:16px;width:min(460px,92vw);max-height:80vh;display:flex;flex-direction:column;box-shadow:0 20px 60px #0008;overflow:hidden}
+    .modal-head{padding:12px 14px;background:var(--navy);color:#fff;cursor:grab;user-select:none;-webkit-user-select:none;display:flex;align-items:center;gap:8px;touch-action:none}
+    .modal-head:active{cursor:grabbing}
+    .modal-head h3{margin:0;font-size:.95rem;flex:1}
+    .modal-head .drag-dots{color:#ffffff88;letter-spacing:2px;font-size:1rem}
+    .modal-close{border:0;background:#ffffff22;color:#fff;border-radius:8px;width:30px;height:30px;font-size:1.1rem;line-height:1;cursor:pointer}
+    .modal-body{padding:14px;overflow:auto;display:grid;gap:10px}
+    .modal-body label{font-size:.82rem;margin-bottom:4px;color:var(--navy)}
+    .modal-foot{padding:12px 14px;border-top:1px solid var(--line);display:flex;gap:8px}
+
+    /* ===== طباعة الصورة / تقرير النتائج ===== */
+    #printArea{display:none}
+    body.report-open{overflow:hidden}
+    body.report-open #printArea{display:block;position:fixed;inset:0;z-index:500;background:#fff;overflow:auto;padding:0 14px 30px;-webkit-overflow-scrolling:touch}
+    .rep-bar{position:sticky;top:0;z-index:2;background:#fff;display:flex;gap:8px;padding:10px 0;border-bottom:2px solid #173f5f;margin-bottom:10px}
+    .rep-bar .btn{flex:1}
+    .rep td small{display:block;color:#555;font-size:8pt}
+    @media print{
+      body{background:#fff}
+      body.printing .app,body.printing .status,body.printing .modal-overlay,body.report-open .app,body.report-open .status,body.report-open .modal-overlay,.rep-bar{display:none!important}
+      body.report-open{overflow:visible!important}
+      body.report-open #printArea{position:static!important;overflow:visible!important;padding:0!important;inset:auto!important}
+      body.printing #printArea{display:block!important;text-align:center}
+      body.printing #printArea .full{max-width:100%;max-height:95vh;object-fit:contain}
+      @page{margin:10mm}
+    }
+
+    @media(max-width:980px){.shell{grid-template-columns:1fr}.split{grid-template-columns:minmax(0,42%) minmax(0,58%);gap:6px}.image-wrap{min-height:320px;max-height:55vh}.top-fields{grid-template-columns:1fr}.workspace{padding:8px}.panel-head{padding:7px 5px}.panel-head .btn,.upload-btn{padding:7px 8px;font-size:.8rem}table{font-size:.75rem}th{padding:7px 2px}td input{padding:7px 2px;font-size:.75rem}.num{width:30px}.row-actions{width:28px}}
+    /* ===== شاشة المراجعة: الصورة + نوع السيارة ورقم اللوحة ===== */
+    #imgBox{cursor:zoom-in}
+    .rv{position:fixed;inset:0;z-index:600;background:#11181d;display:flex;flex-direction:column;color:#fff}
+    .rv[hidden]{display:none}
+    body.rv-open{overflow:hidden}
+    .rv-bar{display:flex;gap:6px;align-items:center;padding:8px;background:#173f5f;flex-wrap:wrap}
+    .rv-bar b{margin-left:auto;font-size:.9rem}
+    .rv-bar button{border:0;border-radius:8px;padding:8px 11px;font-weight:700;background:#ffffff26;color:#fff;font-size:.85rem}
+    .rv-modes{display:inline-flex;gap:4px}.rv-modes button.on{background:#fff;color:#173f5f}
+    #rvClose{background:#157347}
+    .rv-side{flex:1;min-height:0;display:flex;direction:ltr}
+    .rv-img{flex:1.35;overflow:auto;background:#20262b;position:relative;-webkit-overflow-scrolling:touch}
+    #rvBox{position:relative;width:100%;overflow:hidden}#rvImg{width:100%;display:block}
+    .rv-img.calibrating #rvBox{cursor:crosshair;outline:4px dashed #ffd166;outline-offset:-4px}
+    .rv-list{flex:1;max-width:46%;overflow:auto;background:#fff;color:#17212b;direction:rtl;-webkit-overflow-scrolling:touch}
+    .rv-item{display:grid;grid-template-columns:24px 1fr;gap:4px;padding:6px 5px;border-bottom:1px solid #cbdde8}
+    .rv-item.on{background:#dff1fb;box-shadow:inset 0 0 0 3px #1685c5}
+    .rv-item .n{font-weight:700;color:#173f5f;align-self:center;text-align:center;font-size:.85rem}
+    .rv-item input{width:100%;border:1px solid #cbdde8;border-radius:7px;padding:7px 5px;font-size:.88rem;text-align:center;background:#fff;color:#17212b}
+    .rv-item input+input{margin-top:4px;font-weight:700}
+    .rv-item input.chg{background:#fff0a8;border-color:#e6a700}
+    .rv-row{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:10px;padding:12px;direction:rtl}
+    .rv-strip{overflow:auto;background:#fff;border-radius:10px;border:3px solid #f08c00;flex-shrink:0;direction:ltr}
+    #rvStrip{display:block;width:100%}
+    .rv-row label{color:#fff;font-weight:700;margin:0}
+    .rv-row input{display:block;width:100%;font-size:1.25rem;padding:12px;border-radius:10px;border:3px solid transparent;text-align:center;margin-top:5px;background:#fff;color:#17212b}
+    .rv-row input.chg{background:#fff0a8;border-color:#e6a700}
+    #rvPlate{font-weight:700;letter-spacing:1px}
+    .rv-nav{display:flex;gap:10px}.rv-nav button{flex:1;padding:14px;font-size:1.05rem;border:0;border-radius:10px;font-weight:700;background:#246b94;color:#fff}
+    .rv-nav button:disabled{opacity:.35}
+    .rv-hint{background:#fff3cd;color:#6b4c00;border-radius:8px;padding:8px;font-size:.85rem}
+    .rv-hint[hidden]{display:none}
+    .rv-align{display:flex;gap:8px;align-items:center;justify-content:center;font-size:.85rem;color:#cfe3ef;flex-wrap:wrap}.rv-align button{border:0;border-radius:8px;padding:9px 16px;font-weight:700;background:#f08c00;color:#fff;font-size:.95rem}
+    .rv-pos{text-align:center;font-weight:700;font-size:1.05rem}
+    .rv.mode-side .rv-row{display:none}.rv.mode-row .rv-side{display:none}
+    /* ===== السجلات في الجوال: لوحة جانبية عمودية من اليسار ===== */
+    .drawer-fab,.drawer-close,.drawer-backdrop{display:none}
+    @media(max-width:980px){
+      aside.card{position:fixed;top:0;left:0;bottom:0;width:min(86vw,390px);max-height:none;z-index:320;border-radius:0 18px 18px 0;transform:translateX(-105%);transition:transform .25s ease;padding:14px 12px;display:flex;flex-direction:column;box-shadow:none}
+      body.drawer-open aside.card{transform:none;box-shadow:8px 0 30px #0005}
+      body.drawer-open{overflow:hidden}
+      .drawer-backdrop{position:fixed;inset:0;background:rgba(10,20,30,.45);z-index:310}
+      body.drawer-open .drawer-backdrop{display:block}
+      .records{flex:1;min-height:0;overflow:auto;padding-bottom:20px}
+      .record{padding:12px}.record b{font-size:1rem}.record small{font-size:.8rem}
+      .drawer-close{display:inline-flex;align-items:center;justify-content:center;border:0;background:#e7f1f6;color:var(--navy);border-radius:9px;width:34px;height:34px;font-size:1.2rem;margin-right:8px}
+      .aside-title h2{flex:1}
+      .drawer-fab{display:flex;align-items:center;gap:6px;position:fixed;left:12px;bottom:14px;z-index:300;border:0;border-radius:999px;background:var(--navy);color:#fff;font-weight:700;padding:11px 16px;box-shadow:0 6px 18px #0005;font-size:.9rem}
+      .drawer-fab b{background:#fff;color:var(--navy);border-radius:999px;padding:1px 8px;font-size:.8rem}
+      .drawer-fab.has-results{background:#f08c00}
+      body.drawer-open .drawer-fab{display:none}
+      .status{bottom:70px}
+      .workspace{padding-bottom:70px}
+    }
+    @media(max-width:520px){.ai-tools{grid-template-columns:1fr}.ai-tools .btn{width:100%}.split{grid-template-columns:minmax(0,40%) minmax(0,60%)}.image-wrap{min-height:260px}.panel-head strong{font-size:.78rem}.image-panel .panel-head{display:grid;grid-template-columns:1fr 1fr}.image-panel .panel-head strong{grid-column:1/-1}.table-panel .panel-head{display:block}.table-panel .panel-head .btn{margin-top:5px;width:100%}table{font-size:.66rem}td input{font-size:.66rem}.num{width:26px}.row-actions{width:24px}.remove{font-size:.9rem;padding:3px}.auto-state{width:100%;margin:0}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>محرر الجداول مع الصور</h1>
+    <div class="search"><input id="search" type="search" placeholder="ابحث برقم اللوحة والحروف بأي ترتيب: 778 ا ل ع / ٧٧٨ / ALE 778" autocomplete="off"></div>
+    <button class="btn secondary" id="backupBtn">💾 نسخة احتياطية</button>
+    <button class="btn secondary" id="newBtn">سجل جديد</button>
+  </header>
+  <main class="shell">
+    <section class="workspace card">
+      <div class="top-fields">
+        <div><label for="title">اسم السجل</label><input id="title" class="field" type="text" placeholder="مثال: S1-161"></div>
+        <div><label for="sourceText">النص المراد تحويله</label><textarea id="sourceText" placeholder="الصق النص كاملًا هنا، ثم اضغط تحويل إلى جدول…"></textarea><button class="btn primary" id="convertBtn" style="margin-top:8px">تحويل إلى جدول</button></div>
+      </div>
+      <div class="ai-tools" id="aiTools">
+        <label>مفتاح الذكاء الاصطناعي — Gemini مجاني (AIza…) أو OpenAI (sk-…)<input id="apiKey" type="password" autocomplete="off" placeholder="AIza… أو sk-…"><span class="key-remember"><input type="checkbox" id="rememberKey"> تذكّر المفتاح في هذا الجهاز</span></label>
+        <button class="btn primary" id="compareBtn">فحص الاختلافات</button>
+        <div class="ai-note">يُرسل الجدول والصورة للفحص عند ضغط الزر فقط. راجع النتائج لأن قراءة الخط اليدوي قد تخطئ.</div>
+        <div class="ai-results" id="aiResults"></div>
+      </div>
+      <div class="split">
+        <section class="image-panel">
+          <div class="panel-head"><strong>الصورة الأصلية</strong><label class="upload-btn">إرفاق صورة<input id="imageInput" type="file" accept="image/*"></label><button class="btn secondary" id="printImageBtn" title="طباعة الصورة PDF">🖨️ طباعة</button><button class="btn primary" id="reviewBtn" title="افتح الصورة مع نوع السيارة ورقم اللوحة للتعديل السريع">🔍 مراجعة</button><button class="btn secondary" id="calibBtn" title="اضغط على الصف الأول ثم الأخير في الصورة ليكون التظليل دقيقًا">📏 ضبط الأسطر</button><button class="btn secondary" id="zoomOut" title="تصغير">−</button><button class="btn secondary" id="zoomIn" title="تكبير">+</button></div>
+          <div class="image-wrap" id="imageWrap">
+            <div class="empty" id="imageEmpty"><b>▧</b>أرفق صورة الجدول المكتوب باليد</div>
+            <div id="imgBox" hidden><img id="preview" alt="الصورة المرفقة"><div class="img-band" id="imgBand" hidden><span id="imgBandLabel"></span></div></div>
+          </div>
+        </section>
+        <section class="table-panel">
+          <div class="panel-head"><strong>الجدول القابل للتعديل</strong><span class="edit-hint">الأصفر = تعديل غير محفوظ · الرمادي = تعديل محفوظ · اضغط (م) للنافذة</span><button class="btn secondary" id="focusToggle" title="تشغيل/إيقاف وضع التركيز">🔦 التركيز</button><button class="btn secondary" id="addRow">+ إضافة صف</button></div>
+          <div class="table-wrap"><table><thead><tr id="headerRow"></tr></thead><tbody id="tbody"></tbody></table></div>
+        </section>
+      </div>
+      <div class="actions"><button class="btn primary" id="saveBtn">حفظ وفتح سجل جديد</button><button class="btn secondary" id="updateBtn">حفظ التعديلات فقط</button><button class="btn danger" id="deleteBtn" hidden>حذف السجل</button><span class="auto-state" id="autoState"></span></div>
+    </section>
+    <aside class="card">
+      <div class="aside-title"><h2>السجلات المحفوظة</h2><span class="count" id="count">0</span><button class="drawer-close" id="drawerClose" title="إغلاق">×</button></div>
+      <button class="btn secondary idx-btn" id="indexBtn" title="يقرأ عمود اللوحات من كل صورة مرة واحدة ليشملها البحث">🖼️ قراءة الصور للبحث</button>
+      <div class="backup-bar">
+        <button class="btn secondary" id="exportBtn" title="تنزيل نسخة احتياطية من كل السجلات">⬇️ نسخة احتياطية</button>
+        <button class="btn primary" id="excelBtn" title="تصدير كل الجداول إلى Excel — كل سجل في ورقة">📊 تصدير Excel</button>
+        <label class="btn secondary" style="text-align:center">⬆️ استيراد<input id="importInput" type="file" accept=".json,application/json" hidden></label>
+      </div>
+      <div class="date-filter"><span>📅 تاريخ السجل</span><label>من <input type="date" id="dateFrom"></label><label>إلى <input type="date" id="dateTo"></label><button class="btn secondary" id="dateClear" title="إلغاء فلتر التاريخ">✕</button></div>
+      <div class="search-bar" id="searchBar" hidden><span class="sum" id="searchSum"></span><div class="opts"><label><input type="checkbox" id="scatterChk"> الأرقام متفرقة (أي موقع وأي ترتيب)</label><label><input type="checkbox" id="cropChk" checked> مع صورة السطر</label><label><input type="checkbox" id="approxChk" checked> طباعة القريبة ≈</label></div><button class="btn primary" id="printResultsBtn">🖨️ طباعة النتائج PDF</button></div>
+      <div class="records" id="records"></div>
+    </aside>
+  </main>
+</div>
+
+<!-- النافذة المنبثقة لتعديل الصف — الحفظ يعمل بلمسة واحدة حتى مع الكيبورد مفتوح -->
+<div class="modal-overlay" id="rowModal">
+  <div class="modal-box" id="modalBox">
+    <div class="modal-head" id="modalHead">
+      <span class="drag-dots">⠿</span>
+      <h3 id="modalTitle">تعديل الصف</h3>
+      <button class="modal-close" id="modalClose" title="إغلاق">×</button>
+    </div>
+    <div class="modal-body" id="modalFields"></div>
+    <div class="modal-foot">
+      <button class="btn primary" id="modalSave">💾 حفظ الصف</button>
+      <button class="btn secondary" id="modalCancel">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<div class="rv mode-side" id="rv" hidden>
+  <div class="rv-bar">
+    <b id="rvTitle">مراجعة الصورة</b>
+    <span class="rv-modes"><button data-mode="side">↔ جنب بعض</button><button data-mode="row">▭ صف بصف</button></span>
+    <button id="rvUp" title="السطر المظلل غير مطابق؟ حرّكه لأعلى (لهذا الصف وما بعده)">▲ سطر</button><button id="rvDown" title="حرّك السطر المظلل لأسفل (لهذا الصف وما بعده)">▼ سطر</button><button id="rvCalib" title="ضبط الأسطر">📏</button><button id="rvZoomOut" title="تصغير">−</button><button id="rvZoomIn" title="تكبير">+</button>
+    <button id="rvClose">✓ تم</button>
+  </div>
+  <div class="rv-side">
+    <div class="rv-img" id="rvImgWrap"><div id="rvBox"><img id="rvImg" alt=""><div class="img-band" id="rvBand" hidden><span id="rvBandLabel"></span></div></div></div>
+    <div class="rv-list" id="rvList"></div>
+  </div>
+  <div class="rv-row">
+    <div class="rv-strip" id="rvStripWrap"><canvas id="rvStrip"></canvas></div>
+    <div class="rv-hint" id="rvHint" hidden>القص تقريبي — اضغط 📏 ثم المس منتصف الصف الأول ثم آخر صف في الصورة ليصبح دقيقًا.</div>
+    <div class="rv-pos" id="rvPos"></div>
+    <div class="rv-align">السطر المظلل لا يطابق الجدول؟ <button id="rvUp2">▲ أعلى</button><button id="rvDown2">▼ أسفل</button></div>
+    <label>نوع السيارة<input id="rvType" autocomplete="off"></label>
+    <label>رقم اللوحة<input id="rvPlate" autocomplete="off" enterkeyhint="next"></label>
+    <div class="rv-nav"><button id="rvPrev">السابق ▶</button><button id="rvNext">◀ التالي</button></div>
+  </div>
+</div>
+<div class="drawer-backdrop" id="drawerBackdrop"></div>
+<button class="drawer-fab" id="drawerFab">📋 السجلات <b id="fabCount">0</b></button>
+<div class="status" id="status"></div>
+<div id="printArea"></div>
+<script>
+/* ===== كاشف أخطاء عام: أي خطأ في الصفحة يظهر فوراً ===== */
+window.addEventListener('error',e=>{try{toast('⚠️ خطأ: '+(e.message||'غير معروف')+(e.lineno?' (سطر '+e.lineno+')':''))}catch(_){}});
+
+const DEFAULT_HEADERS=['م','نوع السيارة','اللون','رقم اللوحة','الحالة'];let currentHeaders=[...DEFAULT_HEADERS];
+const $=s=>document.querySelector(s);let currentId=null,imageData='',zoom=1,records=[];
+const DRAFT_ID='__draft__',LAST_KEY='imageTableEditorLastId';
+const dbp=new Promise((resolve,reject)=>{const q=indexedDB.open('imageTableEditorDB',1);q.onupgradeneeded=()=>q.result.createObjectStore('records',{keyPath:'id'});q.onsuccess=()=>resolve(q.result);q.onerror=()=>reject(q.error)});
+
+/* ===== التخزين الذكي: IndexedDB ← localStorage ← الذاكرة ===== */
+let MEM=[],LS_KEY='imageTableEditorRecords',storageMode='';
+async function initStorage(){
+  try{await dbp;storageMode='idb'}
+  catch(e){
+    try{localStorage.setItem('__t','1');localStorage.removeItem('__t');storageMode='ls'}
+    catch(e2){storageMode='mem'}
+  }
+  if(storageMode==='ls')toast('تم استخدام التخزين المحلي البديل');
+  if(storageMode==='mem')toast('⚠️ تخزين مؤقت فقط — احفظ نسخة احتياطية فورًا');
+}
+function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function lsSet(k,v){try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}}
+function lsAll(){try{return JSON.parse(localStorage.getItem(LS_KEY)||'[]')}catch(e){return[]}}
+async function all(){
+  if(storageMode==='idb'){const db=await dbp;return new Promise((res,rej)=>{const q=db.transaction('records').objectStore('records').getAll();q.onsuccess=()=>res(q.result.sort((a,b)=>b.updated-a.updated));q.onerror=()=>rej(q.error)})}
+  if(storageMode==='ls')return lsAll().sort((a,b)=>b.updated-a.updated);
+  return [...MEM].sort((a,b)=>b.updated-a.updated);
+}
+async function put(v){
+  if(storageMode==='idb'){const db=await dbp;return new Promise((res,rej)=>{const q=db.transaction('records','readwrite').objectStore('records').put(v);q.onsuccess=()=>res();q.onerror=()=>rej(q.error)})}
+  if(storageMode==='ls'){const a=lsAll(),i=a.findIndex(x=>x.id===v.id);if(i>=0)a[i]=v;else a.push(v);try{localStorage.setItem(LS_KEY,JSON.stringify(a))}catch(e){toast('⚠️ المساحة ممتلئة — صدّر نسخة احتياطية');throw e}return}
+  const i=MEM.findIndex(x=>x.id===v.id);if(i>=0)MEM[i]=v;else MEM.push(v);
+}
+async function del(id){
+  if(storageMode==='idb'){const db=await dbp;return new Promise((res,rej)=>{const q=db.transaction('records','readwrite').objectStore('records').delete(id);q.onsuccess=()=>res();q.onerror=()=>rej(q.error)})}
+  if(storageMode==='ls'){localStorage.setItem(LS_KEY,JSON.stringify(lsAll().filter(x=>x.id!==id)));return}
+  MEM=MEM.filter(x=>x.id!==id);
+}
+
+/* ===== تطبيع البحث ===== */
+const AR_DIGITS='٠١٢٣٤٥٦٧٨٩';
+function norm(s){return String(s??'')
+  .replace(/[٠-٩]/g,d=>String(AR_DIGITS.indexOf(d)))
+  .replace(/[۰-۹]/g,d=>String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))
+  .replace(/[أإآٱ]/g,'ا').replace(/ة/g,'ه').replace(/[ئ]/g,'ي').replace(/[ؤ]/g,'و').replace(/[ى]/g,'ي')
+  .toLowerCase()
+  .replace(/[^a-z0-9\u0600-\u06FF]/g,'');}
+
+let toastTimer=null;
+function toast(t,ms=3000){const s=$('#status');s.textContent=t;s.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>s.classList.remove('show'),ms)}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function renderHeaders(){const h=$('#headerRow');h.innerHTML=currentHeaders.map((v,i)=>`<th class="${i===0?'num':''}">${esc(v)}</th>`).join('')+'<th class="row-actions"></th>'}
+
+function addRow(vals=[]){
+  const data=currentHeaders.map((_,i)=>vals[i]??'');
+  const tr=document.createElement('tr');
+  tr.innerHTML=data.map((v,i)=>`<td class="${i===0?'num':''}"><input value="${esc(v)}" aria-label="${esc(currentHeaders[i])}" ${i===0?'readOnly':''} title="${i===0?'اضغط لفتح نافذة تعديل الصف':''}"></td>`).join('')+`<td class="row-actions"><button class="remove" title="حذف الصف">×</button></td>`;
+  tr.querySelector('.remove').onclick=()=>{if(modalRowEl===tr)closeRowModal();tr.remove();renumber();if(focusRowIndex>=0)setFocusRow(Math.min(focusRowIndex,[...$('#tbody').rows].length-1));markDirty()};
+  tr.cells[0].addEventListener('click',()=>openRowModal(tr));
+  tr.addEventListener('dblclick',e=>{if(e.target.matches('input,td'))openRowModal(tr)});
+  $('#tbody').appendChild(tr);
+}
+function renumber(){[...$('#tbody').rows].forEach((r,i)=>r.cells[0].querySelector('input').value=i+1)}
+function tableRows(){return [...$('#tbody').rows].map(r=>[...r.querySelectorAll('input')].map(x=>x.value.trim()))}
+function loadRows(rows,headers=DEFAULT_HEADERS){currentHeaders=headers?.length?[...headers]:[...DEFAULT_HEADERS];renderHeaders();$('#tbody').innerHTML='';(rows?.length?rows:[currentHeaders.map(()=> '')]).forEach(addRow);setFocusRow(-1)}
+
+/* ===== علامات التعديل: تُحفظ مع السجل وتعود عند فتحه ===== */
+function collectMarks(){
+  const out=[];let ri=0;
+  [...$('#tbody').rows].forEach(tr=>{
+    const vals=[...tr.querySelectorAll('input')].map(x=>x.value.trim());
+    if(!vals.some(Boolean))return;
+    [...tr.cells].forEach((td,c)=>{if(td.classList.contains('changed'))out.push([ri,c,'c']);else if(td.classList.contains('saved-edit'))out.push([ri,c,'s'])});
+    ri++;
+  });
+  return out;
+}
+function applyMarks(marks){(marks||[]).forEach(([r,c,t])=>{const td=$('#tbody').rows[r]?.cells[c];if(td)td.classList.add(t==='c'?'changed':'saved-edit')})}
+function hasEdits(){return !!document.querySelector('#tbody td.changed,#tbody td.saved-edit')}
+
+/* ===== تحويل النص إلى جدول — لا يحذف أي صف، بل يصلح عدد الأعمدة ===== */
+const HEADER_RE=/^(م|#|ت|الرقم|رقم.*|نوع.*|اللون|لون|الحالة|الاسم|التاريخ|ملاحظات|ملاحظة|اللوحة|السيارة|الموقع|المكان|الموديل)$/;
+const isHeaderRow=r=>!r.some(v=>/^[0-9٠-٩]+$/.test(v))&&r.filter(v=>HEADER_RE.test(v)).length>=1;
+function splitCells(line){
+  let s=line.trim().replace(/\\\|/g,'\u0001');
+  if(s.startsWith('|'))s=s.slice(1);
+  if(s.endsWith('|'))s=s.slice(0,-1);
+  return s.split('|').map(x=>x.replace(/\u0001/g,'|').replace(/\*\*|__/g,'').replace(/<br\s*\/?>/gi,' ').trim());
+}
+const isSepRow=r=>r.some(x=>/-{2,}/.test(x))&&r.every(x=>x===''||/^:?-{2,}:?$/.test(x));
+const isEmptyRow=r=>!r.some(Boolean);
+function parseTable(text){
+  text=text.replace(/[│｜¦┃]/g,'|');
+  const lines=text.split(/\r?\n/).map(x=>x.trim());
+  let rows=[];
+  const pipeLines=lines.filter(l=>l.includes('|'));
+  if(pipeLines.length>=2){
+    /* هل الجدول يغلق كل سطر بـ | ؟ عندها السطر الذي لا يحتوي | هو تكملة لخلية انكسرت */
+    const closed=pipeLines.filter(l=>l.endsWith('|')).length>=pipeLines.length/2;
+    let open=false;
+    for(const l of lines){
+      if(!l){open=false;continue}
+      if(l.includes('|')){
+        const cells=splitCells(l);
+        if(isSepRow(cells)){open=false;continue}
+        if(closed&&open&&rows.length&&!l.startsWith('|')){
+          /* تكملة سطر مكسور يحتوي | */
+          const last=rows[rows.length-1];last[last.length-1]=(last[last.length-1]+' '+cells[0]).trim();last.push(...cells.slice(1));
+        }else rows.push(cells);
+        open=closed&&!l.endsWith('|');
+      }else if(open&&rows.length){
+        const last=rows[rows.length-1];last[last.length-1]=(last[last.length-1]+' '+l).trim();
+      }
+    }
+  }else if(lines.some(l=>l.includes('\t'))){
+    rows=lines.filter(l=>l.includes('\t')).map(l=>l.split('\t').map(v=>v.trim()));
+  }else{
+    rows=lines.map(l=>l.split(/\s{2,}/).map(v=>v.trim())).filter(r=>r.length>=2);
+  }
+  rows=rows.filter(r=>!isEmptyRow(r));
+  if(!rows.length)return null;
+
+  /* تحديد صف العناوين: أول صف (من أول 4) فيه كلمتان عنوانيتان على الأقل */
+  let hIdx=rows.slice(0,4).findIndex(r=>isHeaderRow(r)&&r.filter(v=>HEADER_RE.test(v)).length>=2);
+  if(hIdx<0&&isHeaderRow(rows[0]))hIdx=0;
+  let headers=null,body=rows;
+  if(hIdx>=0){
+    headers=[...rows[hIdx]];
+    while(headers.length>1&&headers[0]==='')headers.shift();
+    while(headers.length>1&&headers[headers.length-1]==='')headers.pop();
+    body=rows.slice(hIdx+1);
+  }
+  /* العرض: عدد عناوين الجدول، وإلا الأكثر تكرارًا بين الصفوف */
+  let width=headers?headers.length:0;
+  if(!width){const cnt={};body.forEach(r=>cnt[r.length]=(cnt[r.length]||0)+1);width=+Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]||b-a)[0]}
+  let fixed=0;
+  const hKey=headers?norm(headers.join('')):'';
+  body=body.filter(r=>!(hKey&&norm(r.join(''))===hKey)) /* عناوين مكررة في منتصف النص */
+    .map(r=>{
+      r=[...r];const orig=r.length;
+      while(r.length>width&&r[0]==='')r.shift();
+      while(r.length>width&&r[r.length-1]==='')r.pop();
+      if(r.length>width)r=[...r.slice(0,width-1),r.slice(width-1).filter(Boolean).join(' | ')];
+      while(r.length<width)r.push('');
+      if(r.length!==orig)fixed++;
+      return r;
+    }).filter(r=>!isEmptyRow(r));
+  if(!headers)headers=width===DEFAULT_HEADERS.length?[...DEFAULT_HEADERS]:Array.from({length:width},(_,i)=>`العمود ${i+1}`);
+  return{headers,rows:body,fixed};
+}
+function convertText(){
+  const text=$('#sourceText').value.trim();if(!text)return toast('الصق النص أولًا');
+  const res=parseTable(text);
+  if(!res||!res.rows.length)return toast('لم أجد جدولًا في النص؛ تأكد من وجود | أو Tab بين الأعمدة');
+  if(hasEdits()&&!confirm('التحويل سيستبدل الجدول الحالي وتضيع التعديلات التي عليه. متابعة؟'))return;
+  loadRows(res.rows,res.headers);markDirty();
+  toast(`✅ تم تحويل ${res.rows.length} صف`+(res.fixed?` (تم تصحيح أعمدة ${res.fixed} صف — راجعها)`:''));
+}
+
+/* ===== النافذة المنبثقة — نسخة محصّنة بالكامل ===== */
+let modalRowEl=null,modalRowIdx=-1,lastModalAction=0;
+function openRowModal(tr){
+  if(!tr)return;
+  modalRowEl=tr;
+  modalRowIdx=[...$('#tbody').rows].indexOf(tr);
+  const vals=[...tr.cells].slice(0,currentHeaders.length).map(c=>c.querySelector('input')?.value??'');
+  $('#modalTitle').textContent='✎ تعديل الصف رقم '+(modalRowIdx+1);
+  $('#modalFields').innerHTML=currentHeaders.map((h,c)=>`<div><label>${esc(h)}</label><input type="text" data-col="${c}" value="${esc(vals[c])}"></div>`).join('');
+  $('#modalSave').textContent='💾 حفظ الصف';
+  const box=$('#modalBox');
+  box.style.left='50%';box.style.top='50%';box.style.transform='translate(-50%,-50%)';
+  $('#rowModal').classList.add('show');
+  setTimeout(()=>$('#modalFields input')?.focus(),60);
+}
+function closeRowModal(){$('#rowModal').classList.remove('show');modalRowEl=null;modalRowIdx=-1}
+function saveRowModal(){
+  if(!$('#rowModal').classList.contains('show'))return;
+  const now=Date.now();if(now-lastModalAction<400)return;lastModalAction=now;
+  const btn=$('#modalSave');
+  btn.textContent='⏳ جارٍ الحفظ…';
+  const done=()=>btn.textContent='💾 حفظ الصف';
+  try{
+    let tr=modalRowEl;
+    if(!tr||!tr.isConnected)tr=$('#tbody').rows[modalRowIdx]||null;
+    if(!tr||!tr.isConnected){toast('⚠️ لم أجد الصف رقم '+(modalRowIdx+1));done();return}
+    const inputs=[...document.querySelectorAll('#modalFields input')];
+    if(!inputs.length){toast('⚠️ حقول النافذة فارغة');done();return}
+    let changed=0;const log=[];
+    inputs.forEach(inp=>{
+      const c=+inp.dataset.col;
+      const cell=tr.cells[c];
+      const tInput=cell?cell.querySelector('input'):null;
+      const oldV=tInput?tInput.value:'';
+      const nv=inp.value;
+      if(tInput&&oldV!==nv){
+        tInput.value=nv;
+        tInput.dispatchEvent(new Event('input',{bubbles:true}));
+        changed++;log.push(currentHeaders[c]+': «'+oldV+'» ← «'+nv+'»');
+      }
+    });
+    toast(changed?'✅ تم تعديل '+changed+' خلية | '+log[0]:'لا يوجد تغيير في الصف');
+    closeRowModal();
+  }catch(err){toast('⚠️ خطأ أثناء الحفظ: '+err.message)}
+  done();
+}
+/* أزرار النافذة: تعمل بلمسة pointerdown (قبل قفزة الكيبورد) + click احتياطاً */
+$('#modalSave').addEventListener('pointerdown',e=>{e.preventDefault();saveRowModal()});
+$('#modalSave').addEventListener('click',e=>{e.preventDefault();saveRowModal()});
+$('#modalCancel').addEventListener('pointerdown',e=>{e.preventDefault();closeRowModal()});
+$('#modalClose').addEventListener('pointerdown',e=>{e.preventDefault();closeRowModal()});
+$('#rowModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeRowModal()});
+/* السحب من شريط العنوان */
+(function(){
+  const head=$('#modalHead'),box=$('#modalBox');
+  let dragging=false,offX=0,offY=0;
+  head.addEventListener('pointerdown',e=>{
+    if(e.target.closest('.modal-close'))return;
+    dragging=true;
+    const r=box.getBoundingClientRect();
+    offX=e.clientX-r.left;offY=e.clientY-r.top;
+    box.style.transform='none';
+    try{head.setPointerCapture(e.pointerId)}catch(_){}
+  });
+  head.addEventListener('pointermove',e=>{
+    if(!dragging)return;
+    let x=e.clientX-offX,y=e.clientY-offY;
+    x=Math.min(Math.max(4,x),innerWidth-box.offsetWidth-4);
+    y=Math.min(Math.max(4,y),innerHeight-box.offsetHeight-4);
+    box.style.left=x+'px';box.style.top=y+'px';
+  });
+  const stop=()=>dragging=false;
+  head.addEventListener('pointerup',stop);
+  head.addEventListener('pointercancel',stop);
+})();
+$('#modalFields').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();saveRowModal()}});
+
+/* ===== وضع التركيز مع محاذاة الصورة ===== */
+let focusRowIndex=-1,focusEnabled=true;
+function setFocusRow(i){
+  const rows=[...$('#tbody').rows];
+  if(!focusEnabled||i<0||i>=rows.length){focusRowIndex=-1;$('#tbody').classList.remove('focus-on');rows.forEach(r=>r.classList.remove('active'));if(hitRow>=0&&hitRow<rows.length)showBand(hitRow,'hit');else hideBand();return}
+  showBand(i,'focus');
+  focusRowIndex=i;$('#tbody').classList.add('focus-on');
+  rows.forEach((r,j)=>r.classList.toggle('active',j===i));
+  rows[i].scrollIntoView({block:'nearest',behavior:'smooth'});
+  scrollImageToRow(i,rows.length,rows[i]);
+}
+/* ===== موقع الصفوف على الصورة + التظليل ===== */
+const CALIB_KEY='imageTableEditorCalib';
+let recCalib=null,hitRow=-1,calibStep=0,calibFirst=0;
+function globalCalib(){try{return JSON.parse(lsGet(CALIB_KEY)||'null')}catch(e){return null}}
+function activeCalib(){return recCalib||globalCalib()}
+/* موقع الصف من الضبط: خطوط الجدول المكتشفة (دقيق) أو نقطتا الضبط اليدوي */
+/* إزاحة يدوية (▲▼) تنطبق على الصف ومابعده */
+function shiftFor(c,i){let o=0;for(const s of (c?.shifts||[]))if(i>=s.from)o+=s.d;return o}
+function bandFromCalib(c,i){
+  if(!c)return null;
+  i+=shiftFor(c,i);
+  if(Array.isArray(c.lines)&&c.lines.length>1){
+    const L=c.lines,k=L.length-1;
+    if(i<0){const g=L[1]-L[0],top=L[0]+i*g;return{c:top+g/2,h:g,angle:c.angle||0}}
+    if(i<k)return{c:(L[i]+L[i+1])/2,h:L[i+1]-L[i],angle:c.angle||0};
+    const g=L[k]-L[k-1],top=L[k]+(i-k)*g;return{c:top+g/2,h:g,angle:c.angle||0};
+  }
+  if(c.n>1){const step=(c.l-c.f)/(c.n-1);return{c:c.f+i*step,h:Math.max(.008,Math.abs(step)),angle:0}}
+  return null;
+}
+function rowNum(i){const raw=String($('#tbody').rows[i]?.cells[0]?.querySelector('input')?.value??'').trim();return /^[0-9٠-٩۰-۹]{1,3}$/.test(raw)?raw:String(i+1)}
+function rowBand(i){
+  const n=$('#tbody').rows.length||1,c=activeCalib(),b=bandFromCalib(c,i);
+  if(b)return{...b,exact:!!recCalib,auto:!!c.lines};
+  return{c:(i+.5)/n,h:1/n,angle:0,exact:false,none:true};
+}
+
+/* ===== اكتشاف خطوط الجدول تلقائيًا من الصورة ===== */
+function detectTableLines(img,nRows){
+  const W0=img.naturalWidth,H0=img.naturalHeight;if(!W0||!H0)return null;
+  const sc=Math.min(1,900/W0),W=Math.round(W0*sc),H=Math.round(H0*sc);
+  const cv=document.createElement('canvas');cv.width=W;cv.height=H;
+  const ctx=cv.getContext('2d',{willReadFrequently:true});ctx.drawImage(img,0,0,W,H);
+  const d=ctx.getImageData(0,0,W,H).data,g=new Uint8Array(W*H);
+  for(let i=0,j=0;i<d.length;i+=4,j++)g[j]=(d[i]*299+d[i+1]*587+d[i+2]*114)/1000;
+  /* بكسل الخط الأفقي أغمق بوضوح من البكسل فوقه وتحته — يتحمل الظل والإضاءة */
+  const k=Math.max(2,Math.round(H/250)),dark=new Uint8Array(W*H);
+  for(let y=k;y<H-k;y++){const row=y*W;for(let x=0;x<W;x++){const v=g[row+x],m=Math.min(g[row-k*W+x],g[row+k*W+x]);if(v<m-Math.max(18,m*.1))dark[row+x]=1}}
+  const x1=Math.round(W*.06),x2=Math.round(W*.94),cx=W/2,cols=[];for(let x=x1;x<x2;x+=2)cols.push(x);
+  let best=null;
+  for(let a=-5;a<=5.001;a+=.25){
+    const t=Math.tan(a*Math.PI/180),P=new Float32Array(H);
+    for(const x of cols){const off=(x-cx)*t;for(let y=0;y<H;y++){const yy=Math.round(y+off);if(yy>=0&&yy<H&&dark[yy*W+x])P[y]++}}
+    let s2=0;for(let y=0;y<H;y++)s2+=P[y]*P[y];
+    if(!best||s2>best.score)best={a,P,score:s2};
+  }
+  const P=best.P,C=cols.length,TH=.25,lines=[];
+  let y=0;while(y<H){
+    if(P[y]/C>=TH){let w=0,m=0;while(y<H&&P[y]/C>=TH){w+=P[y];m+=P[y]*y;y++}lines.push(m/w)}else y++;
+  }
+  const merged=[];for(const l of lines){const p=merged.length-1;if(p>=0&&l-merged[p]<H*.008)merged[p]=(merged[p]+l)/2;else merged.push(l)}
+  if(merged.length<4)return null;
+  /* ارتفاع الصف الأكثر تكرارًا */
+  const gaps=merged.slice(1).map((l,i)=>l-merged[i]).filter(gp=>gp>H*.01);
+  let G=0,bestCnt=0;for(const gp of gaps){const c=gaps.filter(o=>Math.abs(o-gp)<=gp*.12).length;if(c>bestCnt){bestCnt=c;G=gp}}
+  G=gaps.filter(o=>Math.abs(o-G)<=G*.12).reduce((a,b)=>a+b,0)/Math.max(1,bestCnt);
+  if(bestCnt<3)return null;
+  /* أطول سلسلة خطوط متتالية بتباعد ≈ ارتفاع الصف (تُستبعد العناوين والتواقيع) */
+  let bestChain=null;
+  for(let i=0;i<merged.length;i++){
+    const chain=[merged[i]];let j=i;
+    while(j<merged.length-1){
+      let found=-1;for(let q=j+1;q<merged.length&&merged[q]-merged[j]<=G*1.2;q++){const gp=merged[q]-merged[j];if(gp>=G*.82){found=q;break}}
+      if(found<0)break;chain.push(merged[found]);j=found;
+    }
+    if(!bestChain||chain.length>bestChain.length)bestChain=chain;
+  }
+  if(!bestChain||bestChain.length<4)return null;
+  const rowsFound=bestChain.length-1;
+  let L=bestChain;
+  if(nRows&&rowsFound>nRows)L=L.slice(0,nRows+1);
+  return{lines:L.map(v=>v/H),angle:best.a,n:nRows,rowsFound,auto:true};
+}
+const lineCache=new Map();
+async function autoCalibrate(force){
+  if(!imageData)return false;
+  if(recCalib&&!force)return true;
+  const key=imageData.length+':'+imageData.slice(-64);
+  let res=lineCache.get(key);
+  if(res===undefined){
+    const im=$('#preview');
+    if(!im.complete||!im.naturalWidth)await new Promise(r=>im.addEventListener('load',r,{once:true}));
+    await new Promise(r=>setTimeout(r,0));
+    try{res=detectTableLines(im,$('#tbody').rows.length)}catch(e){res=null}
+    lineCache.set(key,res);
+  }
+  if(!res)return false;
+  recCalib={...res,shifts:recCalib?.shifts};updateCalibBtn();
+  if(currentId)markDirty();
+  if(focusRowIndex>=0)showBand(focusRowIndex,'focus');else if(hitRow>=0)showBand(hitRow,'hit');
+  if(!$('#rv').hidden)rvSelect(rvIdx,true);
+  return true;
+}
+let bandAngle=0;
+function bandAt(c,h,label,kind){
+  if(!imageData)return;
+  for(const[b,l]of[['#imgBand','#imgBandLabel'],['#rvBand','#rvBandLabel']]){const band=$(b);
+  band.hidden=false;band.className='img-band '+(kind||'');
+  band.style.top=Math.max(0,(c-h/2)*100)+'%';band.style.height=(h*100)+'%';
+  band.style.transform=bandAngle?`rotate(${bandAngle}deg)`:'';
+  $(l).textContent=label;}
+}
+function showBand(i,kind){
+  if(!imageData||i<0)return hideBand();
+  const b=rowBand(i),num=rowNum(i);
+  bandAngle=b.angle||0;
+  bandAt(b.c,b.h,(kind==='hit'?'🔎 ':'')+'صف '+num+(b.none?' (تقريبي — اضغط 📏)':b.exact?'':' (ضبط عام)'),kind);
+}
+function hideBand(){$('#imgBand').hidden=true;$('#rvBand').hidden=true}
+function scrollImageToRow(i,n,tr){
+  const box=$('#imgBox'),wrap=$('#imageWrap');
+  if(!imageData||!box.offsetHeight)return;
+  const b=rowBand(i);
+  let frac=.5;
+  if(tr){const rr=tr.getBoundingClientRect(),wr=$('.table-wrap').getBoundingClientRect();frac=Math.min(.9,Math.max(.1,((rr.top+rr.bottom)/2-wr.top)/Math.max(wr.height,1)))}
+  wrap.scrollTo({top:Math.max(0,box.offsetTop+b.c*box.offsetHeight-wrap.clientHeight*frac),behavior:'smooth'});
+}
+function updateCalibBtn(){$('#calibBtn').classList.toggle('need',!!imageData&&!activeCalib())}
+$('#calibBtn').onclick=async()=>{
+  if(!calibStep&&imageData&&$('#tbody').rows.length>=2&&!recCalib?.auto){lineCache.clear();if(await autoCalibrate(true)){showBand(0,'focus');return toast(`✅ تم اكتشاف ${recCalib.rowsFound} سطر في الجدول تلقائيًا — اضغط 📏 مرة ثانية للضبط اليدوي`,5000)}}
+  if(!imageData)return toast('أرفق صورة أولًا');
+  if($('#tbody').rows.length<2)return toast('حوّل النص إلى جدول أولًا');
+  if(calibStep){calibStep=0;stopCalibUI();hideBand();return toast('تم إلغاء الضبط')}
+  calibStep=1;$('#imageWrap').classList.add('calibrating');hideBand();
+  toast('① اضغط في الصورة على منتصف الصف الأول',8000);
+};
+function stopCalibUI(){$('#imageWrap').classList.remove('calibrating');$('#rvImgWrap').classList.remove('calibrating')}
+$('#imgBox').addEventListener('click',e=>{if(calibStep)calibClick(e,$('#imgBox'));else openReview()});
+$('#rvBox').addEventListener('click',e=>{
+  if(calibStep)return calibClick(e,$('#rvBox'));
+  /* لمس سطر في الصورة يختار صفه في القائمة */
+  const r=$('#rvBox').getBoundingClientRect(),y=(e.clientY-r.top)/r.height,n=$('#tbody').rows.length;
+  for(let i=0;i<n;i++){const b=rowBand(i);if(Math.abs(y-b.c)<=b.h/2){rvSelect(i,true);const inp=$(`.rv-item[data-i="${i}"] input:last-child`);inp?.scrollIntoView({block:'center',behavior:'smooth'});return}}
+});
+function calibClick(e,box){
+  const r=box.getBoundingClientRect(),y=Math.min(1,Math.max(0,(e.clientY-r.top)/r.height));
+  const n=$('#tbody').rows.length;
+  if(calibStep===1){calibFirst=y;calibStep=2;bandAt(y,.012,'صف 1','calib');toast('② الآن اضغط على منتصف آخر صف (صف '+n+')',8000);return}
+  calibStep=0;stopCalibUI();
+  if(Math.abs(y-calibFirst)<.02)return toast('⚠️ النقطتان قريبتان جدًا — أعد الضبط');
+  recCalib={f:calibFirst,l:y,n};lsSet(CALIB_KEY,JSON.stringify(recCalib));
+  updateCalibBtn();markDirty();showBand(0,'focus');
+  toast('✅ تم ضبط الأسطر — اضغط على أي صف في الجدول ليظلل في الصورة',4000);
+  if(!$('#rv').hidden)rvSelect(rvIdx);
+}
+function showImage(data){imageData=data||'';zoom=1;$('#preview').src=imageData;$('#imgBox').hidden=!imageData;hideBand();updateCalibBtn();$('#imageEmpty').hidden=!!imageData;applyZoom();if(focusRowIndex>=0)requestAnimationFrame(()=>scrollImageToRow(focusRowIndex,[...$('#tbody').rows].length))}
+function applyZoom(){$('#imgBox').style.width=(zoom*100)+'%';if(focusRowIndex>=0)requestAnimationFrame(()=>scrollImageToRow(focusRowIndex,[...$('#tbody').rows].length))}
+
+/* ===== الحفظ التلقائي: أي تعديل يُخزَّن خلال ثانية، وعند مغادرة الصفحة فورًا ===== */
+let autoTimer=null,dirty=false;
+function setAutoState(s){const el=$('#autoState');el.className='auto-state';
+  if(s==='pending'){el.textContent='⏳ جارٍ الحفظ التلقائي…'}
+  else if(s==='saved'){el.classList.add('ok');el.textContent=currentId?'✓ التعديلات محفوظة تلقائيًا':'✓ مسودة محفوظة تلقائيًا'}
+  else if(s==='error'){el.classList.add('err');el.textContent='⚠️ تعذر الحفظ التلقائي — اضغط حفظ'}
+  else el.textContent='';
+}
+function markDirty(){dirty=true;setAutoState('pending');clearTimeout(autoTimer);autoTimer=setTimeout(autoSave,700)}
+function hasData(){const rows=tableRows();return !!($('#title').value.trim()||$('#sourceText').value.trim()||imageData||rows.some(r=>r.slice(1).some(Boolean)))}
+function buildRecord(){
+  const title=$('#title').value.trim();
+  const old=records.find(r=>r.id===currentId);
+  return{id:currentId||crypto.randomUUID(),title:title||old?.title||`سجل ${new Date().toLocaleDateString('ar-SA')}`,rawTitle:$('#title').value,sourceText:$('#sourceText').value,image:imageData,headers:[...currentHeaders],rows:tableRows().filter(r=>r.some(Boolean)),marks:collectMarks(),calib:recCalib,created:old?.created||Date.now(),imgRead:(old&&old.image===imageData)?old.imgRead:undefined,updated:Date.now()};
+}
+async function autoSave(){
+  clearTimeout(autoTimer);if(!dirty)return;dirty=false;
+  try{
+    if(currentId){
+      const rec=buildRecord();await put(rec);
+      const i=records.findIndex(x=>x.id===rec.id);if(i>=0)records[i]=rec;else records.unshift(rec);
+      records.sort((a,b)=>b.updated-a.updated);renderRecords();
+    }else if(hasData()){await put({...buildRecord(),id:DRAFT_ID})}
+    else{await del(DRAFT_ID).catch(()=>{})}
+    setAutoState('saved');
+  }catch(e){dirty=true;setAutoState('error')}
+}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')autoSave()});
+window.addEventListener('pagehide',()=>autoSave());
+
+function fillForm(r,title){recCalib=r.calib||null;hitRow=-1;setTimeout(()=>{if(!recCalib)autoCalibrate()},50);$('#title').value=title??'';$('#sourceText').value=r.sourceText||'';loadRows(r.rows,r.headers);applyMarks(r.marks);showImage(r.image||'')}
+function newRecord(){recCalib=null;hitRow=-1;clearTimeout(autoTimer);dirty=false;currentId=null;lsSet(LAST_KEY,null);$('#title').value='';$('#sourceText').value='';loadRows([],DEFAULT_HEADERS);showImage('');$('#deleteBtn').hidden=true;$('#imageInput').value='';setAutoState('');renderRecords();window.scrollTo({top:0,behavior:'smooth'})}
+async function openRecord(id){
+  if(dirty)await autoSave();
+  const r=records.find(x=>x.id===id);if(!r)return;
+  currentId=id;lsSet(LAST_KEY,id);
+  fillForm(r,r.title||'');
+  $('#deleteBtn').hidden=false;setAutoState('');renderRecords();
+}
+async function refresh(){records=(await all()).filter(r=>r.id!==DRAFT_ID);renderRecords()}
+/* ===== بحث اللوحات: الأرقام + الحروف بأي ترتيب، عربي أو إنجليزي ===== */
+const EN_PLATE={a:'ا',b:'ب',j:'ح',d:'د',r:'ر',s:'س',x:'ص',t:'ط',e:'ع',g:'ق',k:'ك',l:'ل',z:'م',n:'ن',h:'ه',u:'و',v:'ي'};
+/* أحرف تشبه الأرقام في قراءة الخط اليدوي: ه/o بجانب رقم = ٥ ، نقطة بجانب رقم = ٠ */
+function isDigitCh(ch){return ch!=null&&/[0-9٠-٩۰-۹]/.test(ch)}
+function fixLook(str){
+  const a=[...String(str??'')];let changed=true;
+  while(changed){changed=false;a.forEach((ch,i)=>{
+    const near=isDigitCh(a[i-1])||isDigitCh(a[i+1]);if(!near)return;
+    if(/[هoOＯ]/.test(ch)){a[i]='5';changed=true}
+    else if(/[.·•٫∙]/.test(ch)){a[i]='0';changed=true}
+  })}
+  return a.join('');
+}
+function plateParts(str){
+  let digits='',letters='';
+  for(const ch of norm(fixLook(str))){
+    if(ch>='0'&&ch<='9')digits+=ch;
+    else if(ch>='a'&&ch<='z'){if(EN_PLATE[ch])letters+=EN_PLATE[ch]}
+    else if(/[ء-ي]/.test(ch))letters+=ch;
+  }
+  return{digits,letters};
+}
+function lettersIn(cellL,qL){const pool=[...cellL];for(const c of qL){const i=pool.indexOf(c);if(i<0)return false;pool.splice(i,1)}return true}
+/* يرجع 0 لا تطابق، 1 أرقام ضمن رقم أطول، 2 تطابق تام للأرقام */
+/* الخلية «لوحة» إذا فيها حروف وأرقام فقط (1–4 حروف و1–4 أرقام) — بغض النظر عن اسم العمود
+   فلا تدخل التواريخ (١٤٤١/٠٣/٠٧) ولا أرقام الصفوف ولا النصوص الطويلة */
+function isPlateCell(text){
+  const t=fixLook(String(text??'')).replace(/\u0640/g,'').trim();if(!t||t.length>24)return false;
+  if(/[0-9٠-٩۰-۹]\s*[\/\\\-:]\s*[0-9٠-٩۰-۹]/.test(t))return false;
+  const digits=(t.match(/[0-9٠-٩۰-۹]/g)||[]).length,lets=t.match(/[ء-يa-zA-Z]/g)||[];
+  if(digits<1||digits>4||lets.length<1||lets.length>4)return false;
+  /* حروف اللوحات السعودية فقط: ا ب ح د ر س ص ط ع ق ك ل م ن هـ و ى (أو مقابلها الإنجليزي) */
+  if(!lets.every(ch=>/[اأإآٱبحدرسصطعقكلمنهةويىABJDRSXTEGKLZNHUVabjdrsxtegklznhuv]/.test(ch)))return false;
+  return !/[^\s0-9٠-٩۰-۹ء-يـa-zA-Z]/.test(t.replace(/[ً-ٰٟ]/g,''));
+}
+function plateScore(cell,q){
+  if(!isPlateCell(cell))return 0;
+  if(!q.digits)return 0;const c=plateParts(cell);
+  if(!(q.scatter?lettersIn(c.digits,q.digits):c.digits.includes(q.digits)))return 0;
+  if(q.letters&&!lettersIn(c.letters,q.letters))return 0;
+  return c.digits===q.digits?2:1;
+}
+function lev(a,b){const d=Array.from({length:a.length+1},(_,i)=>[i]);for(let j=1;j<=b.length;j++)d[0][j]=j;for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return d[a.length][b.length]}
+function commonLetters(a,b){const pool=[...a];let c=0;for(const ch of b){const i=pool.indexOf(ch);if(i>=0){pool.splice(i,1);c++}}return c}
+/* تطابق تقريبي: رقم مختلف بخانة واحدة، أو حروف مختلفة، أو ترتيب أرقام — لأخطاء قراءة الخط اليدوي */
+function approxScore(cell,q){
+  if(!isPlateCell(cell))return 0;const c=plateParts(cell);if(c.digits.length<2||q.digits.length<3)return 0;
+  const dd=lev(c.digits,q.digits),lm=q.letters.length-commonLetters(c.letters,q.letters);
+  const swapped=c.digits.length===q.digits.length&&[...c.digits].sort().join('')===[...q.digits].sort().join('');
+  if(dd===0)return q.letters&&lm>0?(lm<=1?.8:.6):0;
+  if(dd===1)return !q.letters?.5:lm===0?.75:lm===1?.45:0;
+  if(swapped&&lm<=1)return .55;
+  if(dd===2&&q.digits.length>=4&&q.letters&&lm===0)return .35;
+  return 0;
+}
+/* قراءة الصورة المخزنة: صف ← (القراءة + البدائل) */
+function plateColOf(r){return colIdx(r.headers||DEFAULT_HEADERS,/لوح/,3)}
+function imgRows(r){
+  const rows=r.imgRead?.rows;if(!Array.isArray(rows))return [];
+  return rows.map(x=>{
+    let ri=(r.rows||[]).findIndex(row=>toLatinNum(row[0])===String(x.row));if(ri<0)ri=x.row-1;
+    return{ri,row:x.row,cands:[x.plate,...(x.alternatives||[])].filter(Boolean)};
+  }).filter(x=>x.ri>=0&&x.cands.length);
+}
+function toLatinNum(v){return [...String(v??'')].map(ch=>toLatinDigit(ch)??'').join('')}
+function searchApprox(r,raw){
+  const pq=plateParts(raw),hits=[];let best=0;
+  (r.rows||[]).forEach((row,ri)=>{let score=0,col=-1;row.forEach((cell,ci)=>{const sc=approxScore(cell,pq);if(sc>score){score=sc;col=ci}});if(score){hits.push({ri,col,row,score,approx:true});best=Math.max(best,score)}});
+  for(const ir of imgRows(r)){let sc=0,val='';for(const c of ir.cands){const s2=approxScore(c,pq);if(s2>sc){sc=s2;val=c}}
+    if(!sc||hits.some(h=>h.ri===ir.ri))continue;hits.push({ri:ir.ri,col:plateColOf(r),row:r.rows[ir.ri]||[String(ir.row)],score:sc*.9,approx:true,fromImage:true,imgVal:val});best=Math.max(best,sc*.9)}
+  hits.sort((a,b)=>b.score-a.score);
+  return hits.length?{hits,score:best}:null;
+}
+const scatterOn=()=>!!$('#scatterChk')?.checked;
+function toLatinDigit(ch){if(ch>='0'&&ch<='9')return ch;let i='٠١٢٣٤٥٦٧٨٩'.indexOf(ch);if(i>=0)return String(i);i='۰۱۲۳۴۵۶۷۸۹'.indexOf(ch);return i>=0?String(i):null}
+/* يلوّن الأرقام المطابقة داخل النص */
+function markDigits(text,qd,scatter){
+  const chars=[...String(text??'')],look=[...fixLook(text)],dig=[];chars.forEach((ch,i)=>{const d=toLatinDigit(look[i]);if(d!=null)dig.push([i,d])});
+  const pick=new Set();
+  if(qd){if(!scatter){const k=dig.map(x=>x[1]).join('').indexOf(qd);if(k>=0)for(let j=0;j<qd.length;j++)pick.add(dig[k+j][0])}
+  else for(const d of qd){const m=dig.find(x=>x[1]===d&&!pick.has(x[0]));if(m)pick.add(m[0])}}
+  return chars.map((ch,i)=>pick.has(i)?`<mark>${esc(ch)}</mark>`:esc(ch)).join('');
+}
+function searchRecord(r,raw){
+  const q=norm(raw),pq=plateParts(raw);pq.scatter=scatterOn();
+  const plateMode=pq.digits.length>=2;
+  const hits=[];let best=0;
+  (r.rows||[]).forEach((row,ri)=>{
+    let score=0,col=-1;
+    if(plateMode)row.forEach((cell,ci)=>{const sc=plateScore(cell,pq);if(sc>score){score=sc;col=ci}});
+    if(!plateMode&&!score&&q&&norm(row.join(' ')).includes(q)){score=1;col=row.findIndex(c=>norm(c).includes(q))}
+    if(score){hits.push({ri,col,row});best=Math.max(best,score)}
+  });
+  /* إذا لم يوجد في الجدول: ابحث في قراءة الصورة لنفس الصف */
+  if(plateMode)for(const ir of imgRows(r)){
+    let sc=0,val='';for(const c of ir.cands){const s2=plateScore(c,pq);if(s2>sc){sc=s2;val=c}}
+    if(!sc||hits.some(h=>h.ri===ir.ri))continue;
+    hits.push({ri:ir.ri,col:plateColOf(r),row:r.rows[ir.ri]||[String(ir.row)],fromImage:true,imgVal:val});best=Math.max(best,sc*.9);
+  }
+  hits.sort((a,b)=>a.ri-b.ri);
+  const other=!plateMode&&!hits.length&&q&&norm([r.title,r.sourceText].join(' ')).includes(q);
+  return hits.length||other?{hits,score:best||0.5}:null;
+}
+/* ===== تاريخ السجل ===== */
+function dateFromText(t){
+  const m=/(\d{4})\s*[\/\-.]\s*(\d{1,2})\s*[\/\-.]\s*(\d{1,2})|(\d{1,2})\s*[\/\-.]\s*(\d{1,2})\s*[\/\-.]\s*(\d{4})/.exec([...String(t??'')].map(ch=>toLatinDigit(ch)??ch).join(''));
+  if(!m)return null;const y=+(m[1]||m[6]),mo=+(m[2]||m[5]),d=+(m[3]||m[4]);
+  if(y<1990||y>2100||mo<1||mo>12||d<1||d>31)return null;return new Date(y,mo-1,d).getTime();
+}
+function recordDate(r){return r.created||dateFromText(r.title)||r.updated}
+const dayKey=t=>{const d=new Date(t);return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate()};
+const fmtDay=t=>{const d=new Date(t);return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`};
+function dateRange(){
+  const f=$('#dateFrom').value,t=$('#dateTo').value;
+  const k=v=>{const[y,m,d]=v.split('-').map(Number);return y*10000+m*100+d};
+  return{from:f?k(f):null,to:t?k(t):null};
+}
+function inDateRange(r){const{from,to}=dateRange();if(from==null&&to==null)return true;const k=dayKey(recordDate(r));return(from==null||k>=from)&&(to==null||k<=to)}
+let lastHits=new Map();
+function recordHTML(r,hits){const qd=plateParts($('#search').value).digits,sc=scatterOn();return `<button class="record${r.id===currentId?' current':''}" data-id="${r.id}"><b>${esc(r.title||'بدون اسم')}</b><small>📅 ${fmtDay(recordDate(r))} · ${r.rows.length} صف${(r.marks||[]).length?' · ✎ '+r.marks.length+' تعديل':''}${r.image?(r.imgRead?' · 🖼️✓':' · 🖼️'):''}</small>${hits.slice(0,4).map(h=>h.fromImage?`<span class="hit img${h.approx?' approx':''}" data-row="${h.ri}">🖼️${h.approx?'≈':''} صف ${esc(h.row[0]||h.ri+1)}: في الصورة <em>${h.approx?esc(h.imgVal):markDigits(h.imgVal,qd,sc)}</em> · في الجدول «${esc(h.row[h.col]||'—')}»</span>`:`<span class="hit${h.approx?' approx':''}" data-row="${h.ri}">${h.approx?'≈':'🔎'} صف ${esc(h.row[0]||h.ri+1)}: ${h.row.slice(1).map((c,i)=>i+1===h.col?`<em>${h.approx?esc(c):markDigits(c,qd,sc)}</em>`:esc(c)).filter(Boolean).join(' · ')}</span>`).join('')}${hits.length>4?`<small>+ ${hits.length-4} صف آخر</small>`:''}</button>`}
+function renderRecords(){
+  const raw=$('#search').value.trim();
+  const base=records.filter(inDateRange),rng=dateRange();
+  $('.date-filter').classList.toggle('on',rng.from!=null||rng.to!=null);
+  const dq=raw?dateFromText(raw):null;
+  let list,note='';
+  if(!raw)list=base.map(r=>({r,hits:[]}));
+  else if(dq&&/^[\s0-9٠-٩۰-۹\/\-.]+$/.test(raw)){ /* بحث بتاريخ مكتوب في خانة البحث */
+    list=base.filter(r=>dayKey(recordDate(r))===dayKey(dq)).map(r=>({r,hits:[]}));
+    note=`<div class="approx-note">📅 السجلات بتاريخ ${fmtDay(dq)}: ${list.length}</div>`;
+  }
+  else{
+    const records=base;
+    list=records.map(r=>{const m=searchRecord(r,raw);return m?{r,...m}:null}).filter(Boolean).sort((a,b)=>b.score-a.score||b.r.updated-a.r.updated);
+    /* النتائج القريبة (رقم مختلف بخانة، حرف مختلف…) تظهر دائمًا بعد النتائج التامة — مجانًا بدون ذكاء اصطناعي */
+    if(plateParts(raw).digits.length>=3){
+      const exactAny=list.some(x=>x.hits.length);
+      const byId=new Map(list.map(x=>[x.r.id,x]));let nap=0;
+      for(const r of records){
+        const m=searchApprox(r,raw);if(!m)continue;
+        const ex=byId.get(r.id),have=new Set((ex?.hits||[]).map(h=>h.ri));
+        const extra=m.hits.filter(h=>!have.has(h.ri));if(!extra.length)continue;nap+=extra.length;
+        if(ex)ex.hits=[...ex.hits,...extra];
+        else{const e={r,hits:extra,score:m.score*.5};byId.set(r.id,e);list.push(e)}
+      }
+      list.sort((a,b)=>b.score-a.score||b.r.updated-a.r.updated);
+      if(nap)note=`<div class="approx-note">${exactAny?'':`لا يوجد تطابق تام لـ «${esc(raw)}».<br>`}النتائج المعلّمة بـ <b>≈</b> قريبة (رقم أو حرف مختلف) — قد يكون الجدول مقروءًا خطأ. افتحها وقارن بالسطر المظلل في الصورة.</div>`;
+    }
+  }
+  lastHits=new Map(list.map(x=>[x.r.id,x.hits]));updateIndexBtn();
+  const withHits=list.filter(x=>x.hits.length),nh=withHits.reduce((a,x)=>a+x.hits.length,0),nApprox=withHits.reduce((a,x)=>a+x.hits.filter(h=>h.approx).length,0);
+  $('#searchBar').hidden=!raw;
+  const ni=withHits.reduce((a,x)=>a+x.hits.filter(h=>h.fromImage).length,0);
+  $('#searchSum').textContent=raw?(nh?`${nh} صف مطابق في ${withHits.length} سجل`+(ni?` (منها ${ni} من قراءة الصور 🖼️)`:'')+(nApprox?` · منها ${nApprox} قريبة ≈`:''):'لا توجد صفوف مطابقة'):'';
+  $('#printResultsBtn').disabled=!nh;
+  $('#count').textContent=list.length;$('#fabCount').textContent=list.length;$('#drawerFab').classList.toggle('has-results',!!raw);
+  $('#records').innerHTML=list.length?note+list.map(({r,hits})=>recordHTML(r,hits)).join(''):'<div style="color:#647483;text-align:center;padding:24px 8px">لا توجد سجلات مطابقة ولا نتائج قريبة</div>';
+  document.querySelectorAll('.record').forEach(b=>b.onclick=e=>{
+    const hit=e.target.closest('[data-row]'),hits=lastHits.get(b.dataset.id)||[];
+    const row=hit?+hit.dataset.row:(hits.length?hits[0].ri:-1);
+    openRecord(b.dataset.id).then(()=>showHitRow(row));
+  });
+}
+/* ===== طباعة نتائج البحث PDF — الصفوف المطابقة فقط ===== */
+/* ===== صفحة طباعة مستقلة: تُفتح في تبويب جديد — تطبع بشكل صحيح في الجوال ===== */
+const PRINT_CSS=`*{box-sizing:border-box}body{margin:0;padding:12px;background:#fff;color:#000;font-family:Tahoma,Arial,sans-serif;direction:rtl}
+.bar{position:sticky;top:0;background:#fff;display:flex;gap:8px;padding:8px 0 10px;border-bottom:2px solid #173f5f;margin-bottom:10px}
+.bar button{flex:1;border:0;border-radius:10px;padding:13px;font:700 16px Tahoma,Arial;background:#157347;color:#fff}.bar button+button{background:#e7f1f6;color:#173f5f}
+h2{font-size:18px;margin:0 0 4px}.meta{font-size:12px;color:#444;margin:0 0 10px}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{border:1px solid #666;padding:5px;text-align:center;vertical-align:middle}th{background:#e6edf2;color:#000}
+thead{display:table-header-group}tbody{break-inside:avoid;page-break-inside:avoid}td small{display:block;color:#555;font-size:10px}
+.plate{font-weight:700;font-size:15px;letter-spacing:.5px}.car{font-size:14px}mark{background:#ffd54f;color:#000;font-weight:700;padding:0 1px}.ap{color:#1d3b6e;font-size:10px;font-weight:400}
+.crop td{padding:2px;background:#fafafa}.crop img{width:100%;max-height:80px;object-fit:contain;display:block}
+img.full{display:block;width:100%;height:auto}
+@media print{.bar{display:none}body{padding:0}@page{margin:10mm}}`;
+function openPrintWin(){
+  let w=null;try{w=window.open('','_blank')}catch(e){}
+  if(w){try{w.document.write('<!doctype html><meta charset="utf-8"><body style="font-family:Tahoma;direction:rtl;padding:30px;text-align:center">⏳ جارٍ تجهيز الطباعة…</body>');w.document.close()}catch(e){}}
+  return w;
+}
+function showPrintPage(w,title,inner){
+  const html=`<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title><style>${PRINT_CSS}</style></head><body><div class="bar"><button onclick="window.print()">🖨️ طباعة / حفظ PDF</button><button onclick="window.close()">✕ إغلاق</button></div>${inner}<script>window.addEventListener('load',()=>setTimeout(()=>window.print(),400))<\/script></body></html>`;
+  if(w&&!w.closed){w.document.open();w.document.write(html);w.document.close();return}
+  /* المتصفح منع التبويب الجديد: افتح الصفحة كملف */
+  const url=URL.createObjectURL(new Blob([html],{type:'text/html'}));
+  const a=document.createElement('a');a.href=url;a.target='_blank';a.rel='noopener';document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),60000);
+  toast('إذا لم تُفتح صفحة الطباعة: اسمح بالنوافذ المنبثقة لهذا الموقع',5000);
+}
+function loadImg(src){return new Promise(res=>{const im=new Image();im.onload=()=>res(im);im.onerror=()=>res(null);im.src=src})}
+async function cropRow(r,ri,cache){
+  if(!r.image)return '';
+  if(!cache.has(r.id))cache.set(r.id,await loadImg(r.image));
+  const im=cache.get(r.id);if(!im)return '';
+  let c=r.calib;
+  if(!c){const k=r.image.length+':'+r.image.slice(-64);if(!lineCache.has(k)){try{lineCache.set(k,detectTableLines(im,(r.rows||[]).length))}catch(e){lineCache.set(k,null)}}c=lineCache.get(k)||globalCalib()}
+  const bb=bandFromCalib(c,ri);if(!bb)return '';
+  const ctr=bb.c,h=bb.h*1.5;
+  const y0=Math.max(0,(ctr-h/2)*im.naturalHeight),hh=Math.min(im.naturalHeight-y0,h*im.naturalHeight);
+  if(hh<=2)return '';
+  const W=Math.min(1100,im.naturalWidth),sc=W/im.naturalWidth,cv=document.createElement('canvas');
+  cv.width=W;cv.height=Math.round(hh*sc);cv.getContext('2d').drawImage(im,0,y0,im.naturalWidth,hh,0,0,cv.width,cv.height);
+  return cv.toDataURL('image/jpeg',.8);
+}
+/* اسم السيارة: من عمود «نوع السيارة» إن وُجد، وإلا أول خلية نصية ليست لوحة ولا تاريخًا ولا رقمًا */
+function carNameOf(H,row,plateCol){
+  const i=(H||[]).findIndex(h=>/نوع|سيار|مركب|الصنف|الموديل/.test(h));
+  if(i>=0&&i!==plateCol&&String(row[i]??'').trim())return row[i];
+  for(let c=0;c<row.length;c++){
+    if(c===plateCol)continue;const v=String(row[c]??'').trim();
+    if(!v||!/[ء-يa-zA-Z]{2,}/.test(v)||isPlateCell(v)||/^[\/\s"'″“”-]+$/.test(v)||/^م\s*د\s*م$/.test(v)||/[0-9٠-٩]\s*[\/\-]\s*[0-9٠-٩]/.test(v))continue;
+    return v;
+  }
+  return '';
+}
+function colIdx(headers,re,def){const i=(headers||[]).findIndex(h=>re.test(h));return i>=0?i:def}
+async function printResults(){
+  const raw=$('#search').value.trim();if(!raw)return;
+  const incAp=$('#approxChk').checked;
+  const items=records.map(r=>({r,hits:(lastHits.get(r.id)||[]).filter(h=>incAp||!h.approx)})).filter(x=>x.hits.length);
+  if(!items.length)return toast('لا توجد صفوف مطابقة للطباعة');
+  const printWin=openPrintWin();
+  const btn=$('#printResultsBtn');btn.textContent='⏳ جارٍ التجهيز…';btn.disabled=true;
+  try{
+    const qd=plateParts(raw).digits,sc=scatterOn(),withCrop=$('#cropChk').checked,cache=new Map();
+    let n=0,body='',noCalib=0;
+    for(const{r,hits}of items){
+      const H=r.headers||DEFAULT_HEADERS,pi=colIdx(H,/لوح/,3);
+      for(const h of [...hits].sort((a,b)=>a.ri-b.ri)){
+        n++;const row=h.row,pc=h.col>=0?h.col:pi,val=row[pc]||'',car=carNameOf(H,row,pc);
+        const crop=withCrop?await cropRow(r,h.ri,cache):'';if(withCrop&&r.image&&!crop)noCalib++;
+        const num=/^[0-9٠-٩۰-۹]{1,3}$/.test(String(row[0]||'').trim())?row[0]:h.ri+1;
+        const plate=h.fromImage?(h.approx?esc(h.imgVal):markDigits(h.imgVal,qd,sc))+`<div class="ap">من الصورة${h.approx?' ≈':''} — الجدول: ${esc(val||'—')}</div>`:h.approx?esc(val)+'<div class="ap">≈ نتيجة قريبة</div>':markDigits(val,qd,sc);
+        body+=`<tbody><tr><td>${n}</td><td>${esc(r.title||'')}<small>📅 ${fmtDay(recordDate(r))}</small></td><td>${esc(num)}</td><td class="car">${esc(car)||'—'}</td><td class="plate">${plate}</td></tr>${crop?`<tr class="crop"><td colspan="5"><img src="${crop}" alt=""></td></tr>`:''}</tbody>`;
+      }
+    }
+    const inner=`<h2>نتائج البحث: «${esc(raw)}»</h2><p class="meta">${n} لوحة مطابقة في ${items.length} سجل${sc?' · الأرقام متفرقة':''} · ${new Date().toLocaleString('ar-SA')}</p><table><thead><tr><th style="width:7%">#</th><th style="width:24%">السجل</th><th style="width:7%">م</th><th style="width:28%">نوع السيارة</th><th>رقم اللوحة</th></tr></thead>${body}</table>`;
+    if(noCalib)toast(`${noCalib} صف بدون صورة سطر (سجله غير مضبوط 📏)`,4000);
+    showPrintPage(printWin,`نتائج ${raw}`,inner);
+  }catch(e){toast('⚠️ تعذرت الطباعة: '+e.message);try{printWin&&printWin.close()}catch(_){}}
+  finally{btn.textContent='🖨️ طباعة النتائج PDF';btn.disabled=false}
+}
+$('#printResultsBtn').onclick=printResults;
+$('#scatterChk').onchange=renderRecords;
+/* يضيء الصف المطابق ويحرك الصورة لمكانه */
+function showHitRow(i){
+  document.querySelectorAll('#tbody tr.search-hit').forEach(r=>r.classList.remove('search-hit'));
+  const tr=$('#tbody').rows[i];if(!tr){hitRow=-1;return}
+  hitRow=i;tr.classList.add('search-hit');
+  tr.scrollIntoView({block:'center',behavior:'smooth'});
+  showBand(i,'hit');
+  const go=()=>scrollImageToRow(i,$('#tbody').rows.length,tr);
+  const img=$('#preview');
+  if(img.complete&&img.clientHeight)setTimeout(go,150);else img.addEventListener('load',()=>setTimeout(go,50),{once:true});
+  if(innerWidth<=980)$('.workspace').scrollIntoView({behavior:'smooth'});
+  if(!activeCalib())toast('للتظليل الدقيق في الصورة اضغط 📏 ضبط الأسطر مرة واحدة',4500);
+}
+
+/* ===== طباعة الصورة PDF ===== */
+$('#printImageBtn').onclick=()=>{
+  if(!imageData)return toast('أرفق صورة أولًا');
+  const w=openPrintWin();
+  showPrintPage(w,$('#title').value.trim()||'صورة',`<img class="full" src="${imageData}" alt="">`);
+};
+
+/* ===== نسخة احتياطية / استيراد ===== */
+$('#exportBtn').onclick=async()=>{
+  await autoSave();
+  const data=(await all()).filter(r=>r.id!==DRAFT_ID);
+  const blob=new Blob([JSON.stringify({app:'imageTableEditor',version:2,exported:Date.now(),records:data},null,1)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=`نسخة-احتياطية-${new Date().toISOString().slice(0,10)}.json`;a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+  toast(`تم تنزيل ${data.length} سجلًا`);
+};
+$('#importInput').onchange=async e=>{
+  const f=e.target.files[0];if(!f)return;
+  try{
+    const data=JSON.parse(await f.text());
+    const arr=Array.isArray(data)?data:data.records;
+    if(!Array.isArray(arr))throw new Error('ملف غير صالح');
+    let n=0;
+    for(const r of arr){if(r&&r.id&&r.id!==DRAFT_ID&&Array.isArray(r.rows)){await put(r);n++}}
+    await refresh();toast(`تم استيراد ${n} سجلًا`);
+  }catch(err){toast('تعذر الاستيراد: '+err.message)}
+  e.target.value='';
+};
+$('#backupBtn').onclick=()=>$('#exportBtn').click();
+
+/* ===== تصدير Excel: ورقة «الكل» + ورقة لكل سجل — بدون مكتبات خارجية ===== */
+const CRC_T=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+function crc32(u8){let c=0xFFFFFFFF;for(let i=0;i<u8.length;i++)c=CRC_T[(c^u8[i])&255]^(c>>>8);return(c^0xFFFFFFFF)>>>0}
+function zipStore(files){ /* files: [{name,data:string}] → Blob (ZIP بدون ضغط) */
+  const enc=new TextEncoder(),parts=[],central=[];let off=0;
+  for(const f of files){
+    const name=enc.encode(f.name),data=enc.encode(f.data),crc=crc32(data);
+    const h=new DataView(new ArrayBuffer(30));
+    h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x0800,true);h.setUint16(8,0,true);h.setUint16(10,0,true);h.setUint16(12,0x21,true);
+    h.setUint32(14,crc,true);h.setUint32(18,data.length,true);h.setUint32(22,data.length,true);h.setUint16(26,name.length,true);h.setUint16(28,0,true);
+    parts.push(new Uint8Array(h.buffer),name,data);
+    const c=new DataView(new ArrayBuffer(46));
+    c.setUint32(0,0x02014b50,true);c.setUint16(4,20,true);c.setUint16(6,20,true);c.setUint16(8,0x0800,true);c.setUint16(10,0,true);c.setUint16(12,0,true);c.setUint16(14,0x21,true);
+    c.setUint32(16,crc,true);c.setUint32(20,data.length,true);c.setUint32(24,data.length,true);c.setUint16(28,name.length,true);c.setUint32(42,off,true);
+    central.push(new Uint8Array(c.buffer),name);
+    off+=30+name.length+data.length;
+  }
+  const csize=central.reduce((a,x)=>a+x.length,0),e=new DataView(new ArrayBuffer(22));
+  e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,csize,true);e.setUint32(16,off,true);
+  return new Blob([...parts,...central,new Uint8Array(e.buffer)],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+}
+const xesc=v=>String(v??'').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function colName(i){let s='';i++;while(i){const m=(i-1)%26;s=String.fromCharCode(65+m)+s;i=(i-m-1)/26}return s}
+/* sheet: {name, rows:[[...]], widths:[], headerRow:index|-1, merges:['A1:E1'], filter:bool} */
+function sheetXML(sh){
+  const w=Math.max(1,...sh.rows.map(r=>r.length));
+  const rows=sh.rows.map((r,ri)=>`<row r="${ri+1}">${r.map((v,ci)=>v===''||v==null?'':`<c r="${colName(ci)}${ri+1}" t="inlineStr"${ri===sh.headerRow?' s="1"':ri===0&&sh.titleRow?' s="2"':''}><is><t xml:space="preserve">${xesc(v)}</t></is></c>`).join('')}</row>`).join('');
+  const cols=`<cols>${Array.from({length:w},(_,i)=>`<col min="${i+1}" max="${i+1}" width="${sh.widths?.[i]||16}" customWidth="1"/>`).join('')}</cols>`;
+  const pane=sh.headerRow>=0?`<pane ySplit="${sh.headerRow+1}" topLeftCell="A${sh.headerRow+2}" activePane="bottomLeft" state="frozen"/>`:'';
+  const filt=sh.filter&&sh.rows.length>1?`<autoFilter ref="A${sh.headerRow+1}:${colName(w-1)}${sh.rows.length}"/>`:'';
+  const mer=sh.merges?.length?`<mergeCells count="${sh.merges.length}">${sh.merges.map(m=>`<mergeCell ref="${m}"/>`).join('')}</mergeCells>`:'';
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheetViews><sheetView rightToLeft="1" workbookViewId="0">${pane}</sheetView></sheetViews>${cols}<sheetData>${rows}</sheetData>${filt}${mer}</worksheet>`;
+}
+function buildXlsx(sheets){
+  const files=[
+    {name:'[Content_Types].xml',data:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>${sheets.map((_,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}</Types>`},
+    {name:'_rels/.rels',data:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`},
+    {name:'xl/workbook.xml',data:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><bookViews><workbookView/></bookViews><sheets>${sheets.map((sh,i)=>`<sheet name="${xesc(sh.name)}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('')}</sheets>${sheets.some(sh=>sh.filter)?`<definedNames>${sheets.map((sh,i)=>sh.filter&&sh.rows.length>1?`<definedName name="_xlnm._FilterDatabase" localSheetId="${i}" hidden="1">'${xesc(sh.name).replace(/'/g,"''")}'!$A$${sh.headerRow+1}:$${colName(Math.max(...sh.rows.map(r=>r.length))-1)}$${sh.rows.length}</definedName>`:'').join('')}</definedNames>`:''}</workbook>`},
+    {name:'xl/_rels/workbook.xml.rels',data:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${sheets.map((_,i)=>`<Relationship Id="rId${i+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i+1}.xml"/>`).join('')}<Relationship Id="rId${sheets.length+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`},
+    {name:'xl/styles.xml',data:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="3"><font><sz val="11"/><name val="Arial"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Arial"/></font><font><b/><sz val="14"/><name val="Arial"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF173F5F"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="3"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment horizontal="center" vertical="center" readingOrder="2"/></xf><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="center" vertical="center" readingOrder="2"/></xf><xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="right" readingOrder="2"/></xf></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`}
+  ];
+  sheets.forEach((sh,i)=>files.push({name:`xl/worksheets/sheet${i+1}.xml`,data:sheetXML(sh)}));
+  return zipStore(files);
+}
+async function exportExcel(){
+  const btn=$('#excelBtn'),old=btn.textContent;btn.textContent='⏳ جارٍ التصدير…';btn.disabled=true;
+  try{
+    await autoSave();
+    const recs=(await all()).filter(r=>r.id!==DRAFT_ID).sort((a,b)=>a.updated-b.updated);
+    if(!recs.length)return toast('لا توجد سجلات للتصدير');
+    const used=new Set(['الكل']);
+    const sheetName=t=>{let base=String(t||'سجل').replace(/[\[\]:*?\/\\']/g,'-').trim().slice(0,26)||'سجل',n=base,i=2;while(used.has(n.toLowerCase()))n=base.slice(0,24)+' ('+(i++)+')';used.add(n.toLowerCase());return n};
+    const date=r=>new Date(r.updated).toLocaleString('ar-SA');
+    const anyRead=recs.some(r=>r.imgRead);
+    const readMap=r=>{const m=new Map();for(const ir of imgRows(r))m.set(ir.ri,ir.cands.join(' / '));return m};
+    const allRows=[['السجل','تاريخ الحفظ',...DEFAULT_HEADERS,...(anyRead?['اللوحة في قراءة الصورة']:[])]];
+    const sheets=[];
+    for(const r of recs){
+      const H=r.headers?.length?r.headers:DEFAULT_HEADERS,rm=readMap(r);
+      const ti=colIdx(H,/نوع|سيار/,1),ci=colIdx(H,/لون/,2),pi=colIdx(H,/لوح/,3),si=colIdx(H,/حال/,4);
+      (r.rows||[]).forEach((row,ri)=>allRows.push([r.title||'',date(r),row[0]??'',row[ti]??'',row[ci]??'',row[pi]??'',row[si]??'',...(anyRead?[rm.get(ri)||'']:[])]));
+      const hdr=[...H,...(r.imgRead?['اللوحة في قراءة الصورة']:[])],w=hdr.length;
+      sheets.push({name:sheetName(r.title),titleRow:true,headerRow:3,rows:[[r.title||''],['تاريخ الحفظ: '+date(r)],[],hdr,...(r.rows||[]).map((row,ri)=>[...H.map((_,c)=>row[c]??''),...(r.imgRead?[rm.get(ri)||'']:[])])],
+        widths:hdr.map((_,i)=>i===0?6:/حال|قراءة/.test(hdr[i])?26:18),merges:w>1?[`A1:${colName(w-1)}1`,`A2:${colName(w-1)}2`]:[]});
+    }
+    const book=[{name:'الكل',headerRow:0,filter:true,rows:allRows,widths:[22,24,6,18,12,18,26,26]},...sheets];
+    const blob=buildXlsx(book);
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`جرد-السيارات-${new Date().toISOString().slice(0,10)}.xlsx`;
+    document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),10000);
+    toast(`✅ تم تصدير ${recs.length} سجل (${allRows.length-1} صف) إلى Excel`,4000);
+  }catch(e){toast('⚠️ تعذر التصدير: '+e.message,5000)}
+  finally{btn.textContent=old;btn.disabled=false}
+}
+$('#excelBtn').onclick=exportExcel;
+
+function responseText(data){if(typeof data.output_text==='string')return data.output_text;for(const item of data.output||[])for(const c of item.content||[])if(c.type==='output_text'&&c.text)return c.text;return ''}
+async function compareWithAI(){
+  const key=$('#apiKey').value.trim();if(!key)return toast('أدخل مفتاح API أولًا');if(!imageData)return toast('أرفق الصورة أولًا');
+  const rows=tableRows();if(!rows.length)return toast('حوّل النص إلى جدول أولًا');
+  document.querySelectorAll('#tbody td.ai-diff,#tbody td.ai-low').forEach(x=>x.classList.remove('ai-diff','ai-low'));
+  const button=$('#compareBtn'),box=$('#aiResults'),tools=$('#aiTools');button.textContent='جارٍ الفحص…';tools.classList.add('ai-checking');box.className='ai-results';box.innerHTML='';
+  const prompt=`أنت مدقق جداول عربية دقيقة. قارن الصورة المكتوبة أو المطبوعة بالجدول الرقمي التالي خلية بخلية. اعتبر الصفوف مرقمة من 1، والأعمدة مرقمة من 0. لا تعتبر اختلاف ترتيب حروف لوحة السيارة الناتج فقط عن اتجاه العربية اختلافًا إذا كانت الحروف والأرقام نفسها. لا تخمن النص غير الواضح. أعد الاختلافات الفعلية فقط.\nالعناوين: ${JSON.stringify(currentHeaders)}\nالصفوف: ${JSON.stringify(rows)}`;
+  const schema={type:'object',additionalProperties:false,properties:{differences:{type:'array',items:{type:'object',additionalProperties:false,properties:{row:{type:'integer'},column:{type:'integer'},table_value:{type:'string'},image_value:{type:'string'},reason:{type:'string'},confidence:{type:'string',enum:['high','medium','low']}},required:['row','column','table_value','image_value','reason','confidence']}},summary:{type:'string'}},required:['differences','summary']};
+  try{
+    let result;
+    if(isGemini(key)){
+      const gs={type:'OBJECT',properties:{differences:{type:'ARRAY',items:{type:'OBJECT',properties:{row:{type:'INTEGER'},column:{type:'INTEGER'},table_value:{type:'STRING'},image_value:{type:'STRING'},reason:{type:'STRING'},confidence:{type:'STRING',enum:['high','medium','low']}},required:['row','column','table_value','image_value','reason','confidence']}},summary:{type:'STRING'}},required:['differences','summary']};
+      result=await geminiJSON(key,prompt,imageData,gs);
+    }else{
+    const res=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},body:JSON.stringify({model:'gpt-4o',store:false,input:[{role:'user',content:[{type:'input_text',text:prompt},{type:'input_image',image_url:imageData,detail:'high'}]}],text:{format:{type:'json_schema',name:'table_comparison',strict:true,schema}},max_output_tokens:2500})});
+    const data=await res.json();if(!res.ok)throw new Error(data.error?.message||`خطأ ${res.status}`);result=JSON.parse(responseText(data));
+    }
+    const valid=[];for(const d of result.differences||[]){const row=$('#tbody').rows[d.row-1],cell=row?.cells[d.column];if(!cell||!cell.querySelector('input'))continue;cell.classList.add(d.confidence==='low'?'ai-low':'ai-diff');cell.title=`في الصورة: ${d.image_value} | ${d.reason}`;valid.push(d)}
+    box.classList.add('show');box.innerHTML=valid.length?`<b>تم العثور على ${valid.length} اختلاف محتمل:</b><ul>${valid.map(d=>`<li>الصف ${d.row} – ${esc(currentHeaders[d.column]||'عمود '+(d.column+1))}: الجدول «${esc(d.table_value)}» والصورة «${esc(d.image_value)}» (${d.confidence==='high'?'ثقة عالية':d.confidence==='medium'?'ثقة متوسطة':'ثقة منخفضة'})</li>`).join('')}</ul>`:`<b style="color:#157347">لم يظهر اختلاف واضح.</b><div>${esc(result.summary||'')}</div>`;
+    toast(valid.length?'تم تظليل الاختلافات':'لم يظهر اختلاف واضح');
+  }catch(err){box.classList.add('show');box.innerHTML=`<b style="color:#b42318">تعذر الفحص:</b> ${esc(err.message)}<br><small>تأكد من المفتاح والاتصال بالإنترنت.</small>`;toast('تعذر إكمال الفحص')}
+  finally{button.textContent='فحص الاختلافات';tools.classList.remove('ai-checking')}
+}
+
+/* ===== شاشة المراجعة ===== */
+let rvMode=lsGet('imageTableEditorRvMode')||(matchMedia('(max-width:980px)').matches?'row':'side'),rvIdx=0,rvZoom=1,stripZoom=+(lsGet('imageTableEditorStripZoom')||1.5);
+function rvCols(){return{ti:colIdx(currentHeaders,/نوع|سيار/,1),pi:colIdx(currentHeaders,/لوح/,3)}}
+function tblInput(i,c){return $('#tbody').rows[i]?.cells[c]?.querySelector('input')}
+function setTbl(i,c,v){const inp=tblInput(i,c);if(!inp||inp.value===v)return;inp.value=v;inp.dispatchEvent(new Event('input',{bubbles:true}))}
+function isChanged(i,c){const td=$('#tbody').rows[i]?.cells[c];return !!td&&(td.classList.contains('changed')||td.classList.contains('saved-edit'))}
+function openReview(i){
+  if(!imageData)return toast('أرفق صورة أولًا');
+  const n=$('#tbody').rows.length;if(!n)return toast('حوّل النص إلى جدول أولًا');
+  closeRowModal?.();
+  rvIdx=Math.min(n-1,Math.max(0,i??(focusRowIndex>=0?focusRowIndex:hitRow>=0?hitRow:0)));
+  $('#rvImg').src=imageData;$('#rvTitle').textContent=($('#title').value.trim()||'مراجعة الصورة');
+  buildRvList();$('#rv').hidden=false;document.body.classList.add('rv-open');if(!recCalib)autoCalibrate();
+  try{history.pushState({rv:1},'')}catch(_){}
+  setRvMode(rvMode);
+}
+function closeReview(fromPop){
+  if($('#rv').hidden)return;
+  if(calibStep){calibStep=0;stopCalibUI()}
+  $('#rv').hidden=true;document.body.classList.remove('rv-open');
+  if(!fromPop){try{if(history.state&&history.state.rv)history.back()}catch(_){}}
+  const tr=$('#tbody').rows[rvIdx];if(tr){tr.scrollIntoView({block:'center'});showBand(rvIdx,'focus');scrollImageToRow(rvIdx,$('#tbody').rows.length,tr)}
+}
+window.addEventListener('popstate',()=>closeReview(true));
+function setRvMode(m){
+  rvMode=m;lsSet('imageTableEditorRvMode',m);
+  $('#rv').className='rv mode-'+m;
+  document.querySelectorAll('.rv-modes button').forEach(b=>b.classList.toggle('on',b.dataset.mode===m));
+  rvApplyZoom();rvSelect(rvIdx,true);
+}
+function buildRvList(){
+  const{ti,pi}=rvCols();
+  $('#rvList').innerHTML=[...$('#tbody').rows].map((tr,i)=>{
+    const v=c=>tr.cells[c]?.querySelector('input')?.value??'';
+    return `<div class="rv-item" data-i="${i}"><span class="n">${esc(rowNum(i))}</span><div><input data-i="${i}" data-c="${ti}" value="${esc(v(ti))}" placeholder="نوع السيارة" class="${isChanged(i,ti)?'chg':''}"><input data-i="${i}" data-c="${pi}" value="${esc(v(pi))}" placeholder="رقم اللوحة" class="${isChanged(i,pi)?'chg':''}" enterkeyhint="next"></div></div>`;
+  }).join('');
+}
+$('#rvList').addEventListener('input',e=>{const t=e.target;if(!t.matches('input'))return;setTbl(+t.dataset.i,+t.dataset.c,t.value);t.classList.add('chg')});
+$('#rvList').addEventListener('focusin',e=>{const t=e.target;if(t.matches('input'))rvSelect(+t.dataset.i)});
+$('#rvList').addEventListener('keydown',e=>{if(e.key!=='Enter'||!e.target.matches('input'))return;e.preventDefault();const all=[...$('#rvList').querySelectorAll('input')],k=all.indexOf(e.target);(all[k+1]||e.target).focus()});
+function rvSelect(i,noFocus){
+  const n=$('#tbody').rows.length;if(!n)return;
+  rvIdx=Math.min(n-1,Math.max(0,i));
+  const{ti,pi}=rvCols();
+  document.querySelectorAll('.rv-item').forEach(el=>el.classList.toggle('on',+el.dataset.i===rvIdx));
+  showBand(rvIdx,'focus');
+  if(rvMode==='side'){
+    const box=$('#rvBox'),wrap=$('#rvImgWrap'),b=rowBand(rvIdx);
+    const go=()=>wrap.scrollTo({top:Math.max(0,box.offsetTop+b.c*box.offsetHeight-wrap.clientHeight/2),behavior:'smooth'});
+    const im=$('#rvImg');if(im.complete&&im.clientHeight)go();else im.addEventListener('load',go,{once:true});
+    const item=$(`.rv-item[data-i="${rvIdx}"]`);if(item&&noFocus)item.scrollIntoView({block:'center'});
+  }else{
+    const tr=$('#tbody').rows[rvIdx],v=c=>tr.cells[c]?.querySelector('input')?.value??'';
+    $('#rvType').value=v(ti);$('#rvPlate').value=v(pi);
+    $('#rvType').classList.toggle('chg',isChanged(rvIdx,ti));$('#rvPlate').classList.toggle('chg',isChanged(rvIdx,pi));
+    $('#rvPos').textContent=`صف ${rowNum(rvIdx)} من ${n}`;
+    $('#rvPrev').disabled=rvIdx===0;$('#rvNext').disabled=rvIdx===n-1;
+    $('#rvHint').hidden=!!activeCalib();
+    renderStrip();
+  }
+}
+function renderStrip(){
+  const im=$('#rvImg');
+  if(!im.complete||!im.naturalWidth){im.addEventListener('load',renderStrip,{once:true});return}
+  const b=rowBand(rvIdx),W=im.naturalWidth,H=im.naturalHeight;
+  const h=Math.max(b.h*3,.05),y0=Math.max(0,Math.min(1-h,b.c-h/2));
+  const outW=Math.min(1600,W),sc=outW/W,cv=$('#rvStrip');
+  cv.width=outW;cv.height=Math.max(20,Math.round(h*H*sc));
+  const ctx=cv.getContext('2d');
+  if(b.angle){ /* تعديل الميلان حتى يظهر السطر أفقيًا */
+    ctx.save();ctx.translate(cv.width/2,(b.c-y0)/h*cv.height);ctx.rotate(-b.angle*Math.PI/180);ctx.translate(-cv.width/2,-(b.c-y0)/h*cv.height);
+    ctx.drawImage(im,0,-y0*H*sc,W*sc,H*sc);ctx.restore();
+  }else ctx.drawImage(im,0,y0*H,W,h*H,0,0,cv.width,cv.height);
+  /* إطار حول الصف الحالي */
+  const ry=((b.c-b.h/2)-y0)/h*cv.height,rh=b.h/h*cv.height;
+  ctx.fillStyle='rgba(0,0,0,.28)';ctx.fillRect(0,0,cv.width,Math.max(0,ry));ctx.fillRect(0,ry+rh,cv.width,cv.height-ry-rh);
+  ctx.strokeStyle='#f08c00';ctx.lineWidth=Math.max(3,cv.width/250);ctx.strokeRect(2,ry,cv.width-4,rh);
+}
+function rvApplyZoom(){
+  $('#rvBox').style.width=(rvZoom*100)+'%';$('#rvStrip').style.width=(stripZoom*100)+'%';
+  /* في الصف بصف: أظهر عمودي نوع السيارة ورقم اللوحة (يمين ووسط المحضر) */
+  const w=$('#rvStripWrap');requestAnimationFrame(()=>{w.scrollLeft=Math.max(0,w.scrollWidth*.96-w.clientWidth)});
+}
+document.querySelectorAll('.rv-modes button').forEach(b=>b.onclick=()=>setRvMode(b.dataset.mode));
+$('#rvZoomIn').onclick=()=>{if(rvMode==='row'){stripZoom=Math.min(5,stripZoom+.5);lsSet('imageTableEditorStripZoom',stripZoom)}else rvZoom=Math.min(4,rvZoom+.25);rvApplyZoom();if(rvMode==='side')rvSelect(rvIdx,true)};
+$('#rvZoomOut').onclick=()=>{if(rvMode==='row'){stripZoom=Math.max(1,stripZoom-.5);lsSet('imageTableEditorStripZoom',stripZoom)}else rvZoom=Math.max(1,rvZoom-.25);rvApplyZoom();if(rvMode==='side')rvSelect(rvIdx,true)};
+$('#rvClose').onclick=()=>closeReview();
+$('#rvCalib').onclick=async()=>{
+  if(!calibStep&&!recCalib?.auto){lineCache.clear();if(await autoCalibrate(true)){rvSelect(rvIdx,true);return toast(`✅ تم اكتشاف ${recCalib.rowsFound} سطر تلقائيًا — اضغط 📏 مرة ثانية للضبط اليدوي`,5000)}}
+  if(calibStep){calibStep=0;stopCalibUI();return toast('تم إلغاء الضبط')}
+  setRvMode('side');rvZoom=1;rvApplyZoom();$('#rvImgWrap').scrollTop=0;
+  calibStep=1;$('#rvImgWrap').classList.add('calibrating');hideBand();
+  toast('① المس في الصورة منتصف الصف الأول',8000);
+};
+function shiftRow(d){
+  if(!recCalib){const g=globalCalib();if(!g)return toast('اضغط 📏 أولًا لضبط الأسطر');recCalib=JSON.parse(JSON.stringify(g))}
+  const sh=recCalib.shifts=(recCalib.shifts||[]);
+  const e=sh.find(x=>x.from===rvIdx);if(e){e.d+=d;if(!e.d)sh.splice(sh.indexOf(e),1)}else sh.push({from:rvIdx,d});
+  sh.sort((a,b)=>a.from-b.from);
+  markDirty();rvSelect(rvIdx,true);
+  toast(`تم تحريك السطر ${d<0?'لأعلى':'لأسفل'} — ينطبق على صف ${rowNum(rvIdx)} وما بعده`,2500);
+}
+['#rvUp','#rvUp2'].forEach(id=>$(id).onclick=()=>shiftRow(-1));
+['#rvDown','#rvDown2'].forEach(id=>$(id).onclick=()=>shiftRow(1));
+$('#rvPrev').onclick=()=>rvSelect(rvIdx-1);
+$('#rvNext').onclick=()=>rvSelect(rvIdx+1);
+$('#rvType').addEventListener('input',()=>{setTbl(rvIdx,rvCols().ti,$('#rvType').value);$('#rvType').classList.add('chg')});
+$('#rvPlate').addEventListener('input',()=>{setTbl(rvIdx,rvCols().pi,$('#rvPlate').value);$('#rvPlate').classList.add('chg')});
+$('#rvType').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('#rvPlate').focus()}});
+$('#rvPlate').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();if(rvIdx<$('#tbody').rows.length-1){rvSelect(rvIdx+1);$('#rvPlate').focus();$('#rvPlate').select()}else{$('#rvPlate').blur();toast('✅ وصلت لآخر صف')}}});
+/* سحب يمين/يسار على الصورة المقصوصة للتنقل بين الصفوف */
+(function(){let x0=null,y0=null;const w=$('#rvStripWrap');
+  w.addEventListener('touchstart',e=>{if(stripZoom>1)return;x0=e.touches[0].clientX;y0=e.touches[0].clientY},{passive:true});
+  w.addEventListener('touchend',e=>{if(x0==null)return;const dx=e.changedTouches[0].clientX-x0,dy=e.changedTouches[0].clientY-y0;x0=null;if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5)rvSelect(rvIdx+(dx>0?1:-1))});
+})();
+$('#reviewBtn').onclick=()=>openReview();
+
+/* ===== قراءة الصور للبحث (فهرسة) ===== */
+const KEY_LS='imageTableEditorApiKey';
+(function(){const k=lsGet(KEY_LS);if(k){$('#apiKey').value=k;$('#rememberKey').checked=true}})();
+$('#rememberKey').onchange=()=>lsSet(KEY_LS,$('#rememberKey').checked?$('#apiKey').value.trim():null);
+$('#apiKey').addEventListener('input',()=>{if($('#rememberKey').checked)lsSet(KEY_LS,$('#apiKey').value.trim())});
+let indexing=false;
+function updateIndexBtn(){
+  if(indexing)return;
+  const withImg=records.filter(r=>r.image),done=withImg.filter(r=>r.imgRead).length;
+  $('#indexBtn').textContent=`🖼️ قراءة الصور للبحث (${done}/${withImg.length})`;
+}
+const PLATE_PROMPT='هذه صورة محضر جرد سيارات مكتوب بخط اليد فيه جدول مرقّم (م). اقرأ عمود «رقم اللوحة» لكل صف بدقة، حرفًا حرفًا ورقمًا رقمًا، واكتبه كما هو في الصورة (الحروف ثم الأرقام). انتبه للأرقام المتشابهة في الخط اليدوي مثل ٢ و٣، ٧ و٨، ٦ و٤، ٠ و٥، ١ و٩. إذا كان أي رقم أو حرف غير واضح فضع في alternatives كل القراءات المحتملة الأخرى للوحة كاملة. تجاهل الصفوف الفارغة وصفوف (بدون) و(م د م) وعلامات التكرار (//). رقم الصف row هو الرقم في عمود م.';
+const isGemini=k=>/^AIza/.test(k);
+const GEMINI_MODELS=['gemini-2.5-flash','gemini-3-flash-preview','gemini-2.0-flash'];let geminiModelIdx=0;
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function geminiJSON(key,prompt,imageDataUrl,schema){
+  const m=/^data:([^;]+);base64,(.*)$/.exec(imageDataUrl||'');if(!m)throw new Error('صورة غير صالحة');
+  for(;geminiModelIdx<GEMINI_MODELS.length;geminiModelIdx++){
+    const model=GEMINI_MODELS[geminiModelIdx];
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt},{inline_data:{mime_type:m[1],data:m[2]}}]}],generationConfig:{temperature:0,responseMimeType:'application/json',responseSchema:schema}})});
+    const data=await res.json().catch(()=>({}));
+    if(res.status===404)continue; /* النموذج غير متاح — جرّب التالي */
+    if(!res.ok){const e=new Error(data.error?.message||`خطأ ${res.status}`);e.status=res.status;throw e}
+    const txt=data.candidates?.[0]?.content?.parts?.map(p=>p.text||'').join('')||'';
+    return JSON.parse(txt);
+  }
+  geminiModelIdx=0;throw new Error('لا يوجد نموذج Gemini متاح لهذا المفتاح');
+}
+async function readImagePlates(rec,key){
+  if(isGemini(key)){
+    const gschema={type:'OBJECT',properties:{rows:{type:'ARRAY',items:{type:'OBJECT',properties:{row:{type:'INTEGER'},plate:{type:'STRING'},alternatives:{type:'ARRAY',items:{type:'STRING'}}},required:['row','plate','alternatives']}}},required:['rows']};
+    return (await geminiJSON(key,PLATE_PROMPT,rec.image,gschema)).rows||[];
+  }
+  const schema={type:'object',additionalProperties:false,properties:{rows:{type:'array',items:{type:'object',additionalProperties:false,properties:{row:{type:'integer'},plate:{type:'string'},alternatives:{type:'array',items:{type:'string'}}},required:['row','plate','alternatives']}}},required:['rows']};
+  const prompt=PLATE_PROMPT;const _unused='هذه صورة محضر جرد سيارات مكتوب بخط اليد فيه جدول مرقّم (م). اقرأ عمود «رقم اللوحة» لكل صف بدقة، حرفًا حرفًا ورقمًا رقمًا، واكتبه كما هو في الصورة (الحروف ثم الأرقام). انتبه للأرقام المتشابهة في الخط اليدوي مثل ٢ و٣، ٧ و٨، ٦ و٤، ٠ و٥، ١ و٩. إذا كان أي رقم أو حرف غير واضح فضع في alternatives كل القراءات المحتملة الأخرى للوحة كاملة. تجاهل الصفوف الفارغة وصفوف (بدون) و(م د م) وعلامات التكرار (//). رقم الصف row هو الرقم في عمود م.';
+  const res=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},body:JSON.stringify({model:'gpt-4o',store:false,input:[{role:'user',content:[{type:'input_text',text:prompt},{type:'input_image',image_url:rec.image,detail:'high'}]}],text:{format:{type:'json_schema',name:'plates',strict:true,schema}},max_output_tokens:2500})});
+  const data=await res.json();if(!res.ok){const e=new Error(data.error?.message||`خطأ ${res.status}`);e.status=res.status;throw e}
+  return JSON.parse(responseText(data)).rows||[];
+}
+async function indexImages(){
+  if(indexing){indexing=false;return}
+  const key=$('#apiKey').value.trim();
+  if(!key){toast('أدخل مفتاح Gemini المجاني أو مفتاح OpenAI أولًا (في المربع الأصفر)',4500);$('#apiKey').scrollIntoView({behavior:'smooth',block:'center'});$('#apiKey').focus();return}
+  if(dirty)await autoSave();
+  let todo=records.filter(r=>r.image&&!r.imgRead);
+  if(!todo.length){
+    if(!confirm('كل الصور مقروءة. هل تريد إعادة قراءة جميع الصور؟'))return;
+    todo=records.filter(r=>r.image);
+  }else if(!confirm(`سيتم إرسال ${todo.length} صورة إلى ${isGemini(key)?'Google Gemini (مجاني — حوالي 7 ثوانٍ لكل صورة)':'OpenAI'} لقراءة اللوحات مرة واحدة فقط. متابعة؟`))return;
+  indexing=true;let ok=0,fail=0;
+  for(let i=0;i<todo.length&&indexing;i++){
+    $('#indexBtn').textContent=`⏳ جارٍ القراءة ${i+1}/${todo.length} — اضغط للإيقاف`;
+    try{
+      if(isGemini(key)&&i>0)await sleep(7000); /* الحد المجاني: حوالي 10 طلبات في الدقيقة */
+      let rows;
+      try{rows=await readImagePlates(todo[i],key)}
+      catch(e){if(e.status!==429)throw e;$('#indexBtn').textContent=`⏳ انتظار حد الاستخدام المجاني… ${i+1}/${todo.length}`;await sleep(45000);rows=await readImagePlates(todo[i],key)}
+      const cur=records.find(x=>x.id===todo[i].id);if(!cur)continue;
+      const upd={...cur,imgRead:{rows,at:Date.now()}};await put(upd);
+      records[records.indexOf(cur)]=upd;ok++;
+    }catch(e){fail++;if(e.status===401||e.status===429&&fail>2){toast('⚠️ توقف: '+e.message,6000);break}}
+  }
+  indexing=false;updateIndexBtn();renderRecords();
+  toast(`✅ تمت قراءة ${ok} صورة`+(fail?` · تعذر ${fail}`:'')+' — البحث الآن يشمل الصور',5000);
+}
+$('#indexBtn').onclick=indexImages;
+
+/* ===== الحفظ اليدوي: الأصفر يتحول إلى رمادي معتم (تعديل محفوظ) ===== */
+async function save(startNew=false){
+  clearTimeout(autoTimer);
+  if(!hasData())return toast('أدخل بيانات أو أرفق صورة أولًا');
+  document.querySelectorAll('#tbody td.changed').forEach(x=>{x.classList.remove('changed');x.classList.add('saved-edit')});
+  const rec=buildRecord();
+  try{await put(rec)}catch(e){document.querySelectorAll('#tbody td.saved-edit').forEach(x=>x.classList.add('changed'));return toast('⚠️ تعذر الحفظ: '+(e.message||e))}
+  dirty=false;currentId=rec.id;lsSet(LAST_KEY,rec.id);
+  await del(DRAFT_ID).catch(()=>{});
+  await refresh();
+  toast('✅ تم الحفظ — التعديلات صارت رمادية');
+  if(startNew)newRecord();else{$('#deleteBtn').hidden=false;setAutoState('saved')}
+}
+$('#imageInput').onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{recCalib=null;showImage(rd.result);markDirty();setTimeout(()=>autoCalibrate(),50)};rd.readAsDataURL(f)};
+$('#convertBtn').onclick=convertText;$('#compareBtn').onclick=compareWithAI;$('#zoomIn').onclick=()=>{zoom=Math.min(3,zoom+.2);applyZoom()};$('#zoomOut').onclick=()=>{zoom=Math.max(.4,zoom-.2);applyZoom()};
+$('#addRow').onclick=()=>{addRow(currentHeaders.map((_,i)=>i===0?String($('#tbody').rows.length+1):
